@@ -15,13 +15,10 @@ export function formatGameForTelegram(game: Game): string {
 }
 
 export function buildPollQuestion(game: Game): string {
-  const parts = [
-    `${game.title} ${game.number}`.trim(),
-    game.date,
-    game.time,
-    game.venue,
-  ].filter(Boolean);
-  const question = parts.join(' | ');
+  const datetime = [game.date, game.time.replace(/^в\s*/i, '')].filter(Boolean).join(', ');
+  const title = `${game.title} ${game.number}`.trim();
+  const location = [game.venue, game.address].filter(Boolean).join(', ');
+  const question = [datetime, title, location].filter(Boolean).join('\n');
   // Telegram poll question limit is 300 chars
   return question.length <= 300 ? question : question.slice(0, 297) + '...';
 }
