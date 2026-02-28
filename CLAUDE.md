@@ -17,7 +17,8 @@ Phase 1 complete: console parser that reads a saved HTML file and outputs a Mark
 ```
 quiz-bot/
 ├── src/
-│   ├── index.ts       # entry point: reads HTML file, calls parser and formatter
+│   ├── index.ts       # entry point: fetches (live) or reads (--local) HTML, calls parser and formatter
+│   ├── fetcher.ts     # fetches live HTML via curl subprocess (bypasses Yandex SmartCaptcha)
 │   ├── parser.ts      # cheerio HTML parsing → Game[]
 │   └── formatter.ts   # Game[] → Markdown string
 ├── data/
@@ -31,8 +32,9 @@ quiz-bot/
 ## Running
 
 ```bash
-npm start   # ts-node src/index.ts — prints Markdown schedule to stdout
-npm run build  # compiles TypeScript to dist/
+npm start          # fetch live schedule from saratov.quizplease.ru → Markdown to stdout
+npm start --local  # parse saved data/Расписание игр.html instead of fetching
+npm run build      # compile TypeScript to dist/
 ```
 
 ## Data Source
@@ -40,7 +42,8 @@ npm run build  # compiles TypeScript to dist/
 The primary data source is the Quiz Please schedule page for Saratov:
 - URL: `https://saratov.quizplease.ru/schedule`
 - The page is in Russian
-- The saved HTML uses Vue.js for client-side rendering — scraping static HTML works for the saved file, but live fetching will require the site's API endpoints or a headless browser
+- HTML is server-side rendered — the game data is present in the raw HTML response
+- **Yandex SmartCaptcha** blocks Node.js's built-in `fetch`/`https` (TLS fingerprint detection); `curl` passes through fine — so fetching is done via `execFile('curl', ...)`
 
 ## HTML Selectors (saratov.quizplease.ru/schedule)
 
