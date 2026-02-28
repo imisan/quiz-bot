@@ -8,9 +8,9 @@ This is a **quiz-bot** project — a bot (likely Telegram) for tracking and noti
 
 ## Project Status
 
-Phase 1 complete: console parser that reads a saved HTML file and outputs a Markdown schedule.
+Phase 2 complete: live fetching from `saratov.quizplease.ru/schedule` + HTML parsing → Markdown output.
 
-**Next step:** Telegram bot integration and live fetching from `saratov.quizplease.ru`.
+**Next step:** Telegram bot integration.
 
 ## Project Structure
 
