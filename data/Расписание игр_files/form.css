@@ -1,0 +1,9 @@
+.ant-input_error {
+  border:solid 1px red !important;
+}
+.ant-input_success {
+  border:solid 1px green !important;
+}
+.ant-error {
+  color: red;
+}

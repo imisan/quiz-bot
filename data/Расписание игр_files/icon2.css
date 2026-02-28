@@ -1,0 +1,216 @@
+.icon {
+    display: inline-block;
+    background: url(https://cdn1.quizplease.com/old_static/img/sprite.png) no-repeat;
+}
+
+.icon-region {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-authorization {
+    width: 12px;
+    height: 16px;
+    background-position: -38px 0;
+}
+
+.icon-vk {
+    width: 19px;
+    height: 11px;
+    background-position: -50px 0;
+}
+
+.icon-fc {
+    width: 8px;
+    height: 18px;
+    background-position: -69px 0;
+}
+
+.icon-in {
+    width: 16px;
+    height: 16px;
+    background-position: -77px 0;
+}
+
+.icon-status {
+    width: 26px;
+    height: 26px;
+    background-position: -145px 0;
+}
+
+.game-status-yellow .icon-status {
+    background-position: -93px 0;
+}
+
+.game-status-red .icon-status {
+    background-position: -119px 0;
+}
+
+.icon-date {
+    width: 16px;
+    height: 16px;
+    background-position: -171px 0;
+}
+
+.icon-money {
+    width: 40px;
+    height: 25px;
+    background-position: 0 -20px;
+}
+
+.icon-clock {
+    width: 22px;
+    height: 22px;
+    background-position: -40px -16px;
+}
+
+.icon-pin {
+    width: 22px;
+    height: 25px;
+    background-position: -62px -18px;
+}
+
+.icon-mobil-menu {
+    width: 25px;
+    height: 17px;
+    background-position: -104px -26px;
+}
+
+.icon-mobil-back {
+    width: 15px;
+    height: 23px;
+    background-position: -154px -26px;
+}
+
+.icon-pin-small {
+    width: 13px;
+    height: 15px;
+    background-position: -171px -16px;
+}
+
+.icon-clock-small {
+    width: 14px;
+    height: 14px;
+    background-position: -184px -16px;
+}
+
+.icon-cash-small {
+    width: 17px;
+    height: 11px;
+    background-position: -40px -54px;
+}
+
+.icon-filltr {
+    width: 30px;
+    height: 28px;
+    background-position: -78px -46px;
+}
+
+.icon-sort {
+    width: 19px;
+    height: 12px;
+    background-position: -108px -43px;
+}
+
+.icon-language {
+    position: relative;
+    left: 20px;
+    width: 20px;
+    top:12px;
+    margin-right: 0px;
+}
+
+.icon-lang {
+    width: 22px;
+    height: 25px;
+    display: inline-block;
+    background: url(https://cdn1.quizplease.com/old_static/img/lang.png) no-repeat;
+    background-size: contain;
+    position: relative;
+    top: 8px;
+}
+
+.header-top-menu.fixed .icon-language img{
+    content:url("https://cdn1.quizplease.com/old_static/img/worldwidefixed.png");
+}
+.header-top-menu.fixed .header-language-active .icon-language img{
+    content:url("https://cdn1.quizplease.com/old_static/img/worldwide.png");
+}
+.header-top-authorization .icon {
+    margin-right: 20px;
+    position: relative;
+    top: 2px;
+}
+@media (max-width: 767px) {
+    .header-top-authorization .icon {
+        margin-right: 1px;
+    }
+}
+
+.bgBlock-contact-soc a:hover .icon, .footer-soc a:hover .icon {
+    opacity: 1;
+}
+.bgBlock-contact-soc a .icon, .footer-soc a .icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    opacity: .6;
+    -webkit-transition: opacity 0.4s;
+    -o-transition: opacity 0.4s;
+    transition: opacity 0.4s;
+}
+.game-info-date .icon {
+    position: relative;
+    top: 2px;
+}
+
+@media (max-width: 992px) {
+    .game-info-date .icon {
+        margin-right: 5px;
+    }
+}
+@media (max-width: 767px) {
+    .game-info-adress .icon {
+        position: absolute;
+        left: 0;
+        top: 2px;
+        opacity: .5;
+    }
+}
+
+.game-content-info-time .icon, .game-content-info-adress .icon {
+    vertical-align: middle;
+}
+
+.footer-authorization .icon {
+    position: relative;
+    top: 2px;
+    margin-right: 10px;
+}
+
+.fillter-open a .icon {
+    margin-right: 15px;
+    vertical-align: middle;
+}
+
+.rating-table-row .icon {
+    margin-right: 15px;
+    opacity: .3;
+}
+
+.rating-table-row-th-active .icon {
+    opacity: 1;
+}
+
+.header-top-menu.fixed .icon-authorization {
+    background-position: -40px -38px;
+}
+
+.header-top-menu.fixed .icon-mobil-menu {
+    background-position: -129px -26px;
+}

@@ -1,0 +1,193 @@
+.badge-difficulty {
+    font-size: 14px;
+    line-height: 120%;
+    cursor: default;
+    position: relative;
+}
+
+.badge-difficulty__container {
+    display: flex;
+}
+
+.badge-difficulty__icon {
+    margin-right: 10px;
+    padding: 2px;
+    min-width: 20px;
+}
+
+.badge-difficulty__subtitle {
+    color: hsla(0, 0%, 100%, .5);
+    margin: auto 4px auto 0;
+}
+
+.schedule-block-info-bar-game_difficulty .badge-difficulty__subtitle {
+    font-size: 14px;
+    line-height: 120%;
+}
+
+.badge-difficulty__title {
+    color: #FFFFFF;
+    font-weight: 500;
+    border-radius: 2px;
+    width: fit-content;
+    margin: auto 0;
+    white-space: nowrap;
+}
+
+.badge-difficulty__title_registration {
+    margin-left: 36px;
+}
+
+/** Детальная страница */
+.badge-difficulty_detail .badge-difficulty__icon {
+    /*margin-left: 2px;*/
+    fill: #D2D2D2;
+}
+
+.badge-difficulty_detail .badge-difficulty__subtitle {
+    color: rgba(0, 0, 0, .5);
+    font-size: 16px;
+    line-height: 120%;
+}
+
+.badge-difficulty_detail .badge-difficulty__title {
+    color: #000000;
+}
+
+/** Главная страница */
+.badge-difficulty_main-page .badge-difficulty__icon {
+    margin-right: 8px;
+    padding: initial;
+    width: 20px;
+    height: 20px;
+}
+
+/** Главная страница белый фон */
+.badge-difficulty_main-light .badge-difficulty__container {
+    height: 22px;
+}
+
+.badge-difficulty_main-light .badge-difficulty__subtitle {
+    color: #8E8E8E;
+    font-size: 16px;
+    line-height: 120%;
+}
+
+.badge-difficulty_main-light .badge-difficulty__title {
+    color: rgba(0, 0, 0, 1);
+    font-size: 14px;
+    line-height: 120%;
+}
+
+.badge-difficulty_main-light .badge-difficulty__description {
+    white-space: initial;
+}
+
+
+.badge-difficulty__description {
+    position: absolute;
+    z-index: 1000;
+    font-size: 12px;
+    line-height: 14px;
+    width: 262px;
+    margin-top: 15px;
+    transform: translateX(-50%);
+    left: 50%;
+    padding: 17px 20px;
+    background: rgba(23, 23, 23, 0.92);
+    border-radius: 10px;
+    visibility: hidden;
+    color: #FFFFFF;
+}
+
+.badge-difficulty__description::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -15px;
+    border-width: 15px;
+    border-style: solid;
+    border-color: transparent transparent rgba(23, 23, 23, 0.92) transparent;
+}
+
+.badge-difficulty:hover .badge-difficulty__description {
+    visibility: visible;
+}
+
+.badge-difficulty_easy.badge-difficulty_detail .badge-difficulty__description {
+    width: 242px;
+    left: 55%;
+}
+
+.badge-difficulty_normal.badge-difficulty_detail .badge-difficulty__description {
+    left: 51%;
+}
+
+.badge-difficulty_hard.badge-difficulty_detail .badge-difficulty__description {
+    width: 242px;
+    left: 52%;
+}
+
+@media (max-width: 760px) {
+    .badge-difficulty_main-page .badge-difficulty__icon {
+        width: 16px;
+        height: 16px;
+        min-width: initial;
+    }
+
+    .schedule-block-info-bar-game_difficulty {
+        margin-bottom: 0px!important;
+    }
+
+    /** Детальная страница */
+    .badge-difficulty_detail .badge-difficulty__icon {
+        margin-left: 0px;
+    }
+
+    .badge-difficulty_detail .badge-difficulty__title {
+        font-size: 16px;
+    }
+
+    .badge-difficulty_easy.badge-difficulty_detail .badge-difficulty__description,
+    .badge-difficulty_hard.badge-difficulty_detail .badge-difficulty__description {
+        width: 222px!important;
+        left: 50%!important;
+    }
+}
+
+@media (max-width: 600px) {
+    .badge-difficulty_detail .badge-difficulty__description {
+        width: 240px!important;
+    }
+    .badge-difficulty_easy.badge-difficulty_detail .badge-difficulty__description,
+    .badge-difficulty_hard.badge-difficulty_detail .badge-difficulty__description {
+        width: 200px!important;
+    }
+}
+
+.margin-bottom-16-lg {
+    margin-bottom: 16px;
+}
+.margin-top-16-lg {
+    margin-top: 16px;
+}
+
+.schedule-block-info-bar-game_difficulty .badge-difficulty__icon {
+    margin-left: 0px!important;
+}
+
+@media (max-width: 768px) {
+    .margin-bottom-16-lg {
+        margin-bottom: initial;
+    }
+
+    .margin-top-16-lg {
+        margin-top: 4px;
+    }
+
+    .schedule-block-info-bar-game_difficulty {
+        margin-bottom: 0px;
+    }
+}
+

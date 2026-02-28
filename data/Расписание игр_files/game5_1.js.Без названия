@@ -1,0 +1,841 @@
+var timeInterval = null;
+var currentId = null;
+let city ='';
+const confirm = document.querySelector(".webant-header-region-confirm")
+function getTimeRemaining(endTime) {
+    var t = Date.parse(endTime) - Date.parse(new Date());
+    var seconds = Math.floor((t / 1000) % 60);
+    var minutes = Math.floor((t / 1000 / 60) % 60);
+    var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+    var days = Math.floor(t / (1000 * 60 * 60 * 24));
+    return {
+        total: t,
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+    };
+}
+function resetFormButton() {
+    var formButton = $("#form-button");
+    const toPay = document.querySelector(".toPay");
+    toPay.style.display = "none";
+    formButton.attr("disabled", false);
+    formButton.removeClass("button-disabled");
+}
+
+// Удаляет лишние поля сертификатов, кроме одной
+function resetCertificates() {
+    const certificates = document.querySelectorAll(".certificate");
+    const wrapper = document.querySelector(".certificate__js");
+    certificates[0].querySelector(".certificate__input__js").dataset.count = 0;
+    if (certificates.length > 1)
+        for (let i = 1; i < certificates.length; i++) {
+            wrapper.removeChild(certificates[i]);
+        }
+}
+
+function removeUnnecessaryCertificates() {
+    const certificates = document.querySelectorAll(".certificate");
+    const wrapper = document.querySelector(".certificate__js");
+    for (let i = 1; i < certificates.length; i++) {
+        const value = certificates[i].querySelector(
+            ".certificate__input__js"
+        ).value;
+        if (!value) wrapper.removeChild(certificates[i]);
+    }
+}
+
+var Game = (function () {
+    var $this = this;
+    return {
+        openModalSecond: function (id, reserve, content_id, target) {
+            $('.haveCertificate').show();
+            $('#is_hidden_apply_certificate').hide();
+            
+            disabledLink(target, true)
+
+            let firstSelector;
+            var url =
+                "/ajax/scope-game" +
+                "?" +
+                $.param({
+                    id: id,
+                });
+            resetFormValidationMessages();
+            resetFormButton();
+            resetCertificates();
+
+            $(".errorMsg").detach();
+            function resetFormValidationMessages() {
+                $("#gamesForm .ant-input").each(function () {
+                    $(this).removeClass("ant-input_success");
+                    $(this).removeClass("ant-input_error");
+                    $(".ant-error").detach();
+                    $(".success-wrapper").hide();
+                    $(".promo-code__input__wrapper").show();
+                    $(".response-msg").text("");
+                    $(".certificate__success-wrapper").hide();
+                    $(".certificate__input__wrapper").show();
+                    $(".certificate__response-msg").text("");
+                    $("#free-place").remove();
+                    $(".activeCertificates").html("");
+                    $(".cerf-radio").show();
+                    $(".firstRadio").attr("checked", true);
+                    $(".firstRadio").click();
+                    $(".secondRadio").attr("checked", false);
+                    $(".payment-men").hide();
+                    $(".payment-undertext").show();
+                    const toPay = document.querySelector(".toPay");
+                    toPay.style.display = "none";
+                    toPay.innerHTML = ``;
+                });
+            }
+
+            function disabledLink(context, isShouldDisabled = false){
+                if(!!context){
+                    if(isShouldDisabled ){
+                        context.classList.add('disabled_link_game')
+                    } else{
+                        context.classList.remove('disabled_link_game')
+                    }
+                }
+            }
+            
+
+            $.get(url, null, function (response) {
+                if (response.success) {
+                    const teamName = document.querySelector('#qprecord-teamname');
+                    teamName.dataset.gameTypeId = response.game_type_id;
+                    
+                    if (parseInt(response.gameId) === 101512 || response.is_hide_apply_certificate) {
+                        $('.haveCertificate').hide();
+                        $('#is_hidden_apply_certificate').show();
+                    }
+
+                    city = response.cityName
+                    $.magnificPopup.open({
+                        items: {
+                            src: "#gamesForm",
+                        },
+                        type: "inline",
+                        preloader: false,
+                        //	focus: '#qprecord-teamname',
+                        closeOnBgClick: true,
+
+                        // When elemened is focused, some mobile browsers in some cases zoom in
+                        // It looks not nice, so we disable it:
+                        callbacks: {
+                            close: function () {
+                                const inputsPromoCert = document.querySelectorAll(
+                                    ".certificate__input__js"
+                                );
+                                if (inputsPromoCert.length) {
+                                    inputsPromoCert.forEach((item) => (item.value = ""));
+                                }
+                                window.repeatPromo = false;
+                                window.typePromoCode = null;
+                                window.promik = null;
+                                if (firstSelector) {
+                                    firstSelector.onchange = () => {};
+                                }
+                                if (currentId != null) {
+                                    clearInterval(timeInterval);
+
+                                    $.get(
+                                        "/ajax/close-reserve?" +
+                                        $.param({
+                                            id: currentId,
+                                        }),
+                                        resetFormButton()
+                                    );
+                                }
+                            },
+                        },
+                    });
+                    disabledLink(target)
+                    //Генерируем иконки для указания количества человек в команде
+                    var wrapper = $(".br-widget")[0];
+                    if (wrapper) {
+                        $("#example").barrating("destroy");
+                        var countSelect = document.querySelector(
+                            '[name="QpRecord[count]"]'
+                        );
+                        countSelect.options.length = 0;
+                        countSelect.style.display = "none";
+                        const averagePlayersCount = Math.round(
+                            response.max_players / 2
+                        );
+
+                        let minPlayers = 2;
+                        let maxPlayers = response.max_players;
+                        if (parseInt(response.gameId) === 118444) {
+                            minPlayers = 4;
+                            maxPlayers = 10;
+                        }
+                        
+                        for (i = minPlayers; i <= maxPlayers; i++) {
+                            countSelect.options.add(
+                                new Option(i, i, false, i === averagePlayersCount)
+                            );
+                        }
+
+
+                        $("#example").barrating({
+                            theme: "bars-square",
+                            showValues: true,
+                            showSelectedRating: false,
+                        });
+                    }
+                    //todo добавление плюсика в виджет выбора кол-ва человек
+                    const wrapperBrWidget = document.querySelector('.br-wrapper .br-widget')
+                    wrapperBrWidget.insertAdjacentHTML('beforeend', `
+            <button class="custom_modal__btn"> &#43; </button>
+          `)
+
+                    const btnModal = document.querySelector(".custom_modal__btn")
+                    if(!!btnModal){
+                        setTimeout(()=>{
+                            btnModal.addEventListener("click", openCustomModale)
+                        }, 50)
+                    }
+
+                    window.promocodePeople = 0;
+
+                    const getPaymentMethod = (string) =>{
+                        if(string == "наличные или карта" || string == "карта" || string == "наличные" || string == "наличные или по QR-коду на игре" || string == "оплата на игре"){
+                           return "оплата на игре"
+                        }else if(string == "оплата онлайн" || string == "онлайн"){
+                           return "оплата онлайн"
+                        }else {
+                           return "оплата онлайн или на игре"
+                        }
+                    }
+
+                    const price = (response.price && typeof response.price === 'string')
+                        ? response.price.replace(/[^0-9]/, '')
+                        : parseInt(response.price);
+
+                    const currency = (response.price && typeof response.price === 'string')
+                        ? response.price.replace(price, '').trim()
+                        : response.price[response.price.length - 1];
+
+                    const toPay = document.querySelector(".toPay");
+                    toPay.dataset.price = price;
+                    toPay.dataset.currency = currency;
+
+                    const activeCertificates = document.querySelector(
+                        ".activeCertificates"
+                    );
+
+                    const selectPeoples = document.getElementById("select-peoples");
+                    const modalFormButton = document.getElementById("form-button");
+                    const modalAgreement =
+                        document.getElementById("modal-agreement");
+                    const paymentType = document.querySelector(".payment-type__js");
+
+                    const countPeopleToPayBlock =
+                        document.querySelector(".payment-men");
+                    const [cash, card] = document.querySelectorAll(".check-input");
+                    const freeSlots = response.count;
+                    const addCertBtn = document.querySelector(
+                        ".add_certificate-field"
+                    );
+
+                    const isWithReservation = !!response.reservation;
+                    const isReserve = response.status === 2;
+                    const isOfflineGame = response.game_type === 0;
+                    const isOfflinePayment = response.payment_icon === 0;
+                    const isOnlinePayment = response.payment_icon === 4;
+                    const isOnlyOnSpotPayment = [0,1,2,7,8].includes(
+                        +response.payment_icon
+                    );
+                    const isOnlyYandexPayment = response.payment_icon === 3;
+                    const isCashOrYandexPayment = response.payment_icon === 5;
+                    // window.offlinePay = isOfflinePayment? true : false
+                    const placeBlock = document.querySelector("#place-block");
+                    switch (response.payment_icon) {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 4:
+                        case 7:
+                        case 8:
+                            window.offlinePay = true;
+                            break;
+                        default:
+                            window.offlinePay = false;
+                            break;
+                    }
+
+                    const totalPrice = document.querySelector("#total-price")
+                        const price2 = document.querySelector("#price-block")
+                        const payString = document.querySelector("#pay-string")
+                        const targetString = document.querySelector("#target-string")
+                        const array = response.text.split(",")
+                        const text = array[1]
+                        const targetPrice = array[0]
+                        const string = getPaymentMethod(text.trim())
+                        targetString.textContent = targetPrice.trim()
+                        payString.textContent = `(${string})`
+                        price2.textContent = price
+                        totalPrice.textContent = price * 5
+                    if (!isOfflineGame) {
+                        placeBlock.style.display = "none";
+                    } else {
+                        placeBlock.style.display = "inherit";
+                    }
+
+                    if (isOnlyYandexPayment && !isOfflineGame) {
+                        selectPeoples.style.display = "none";
+                        modalAgreement.onclick = function () {
+                            window.open("/rules", "_blank");
+                            return false;
+                        };
+                    } else {
+                        selectPeoples.style.display = "block";
+                        modalAgreement.onclick = function () {
+                            window.open("/agreement", "_blank");
+                            return false;
+                        };
+                    }
+
+                    function countCertPeople() {
+                        const certInputs = document.querySelectorAll(
+                            ".certificate__input__js"
+                        );
+
+                        let acc = 0;
+                        for (input of Array.from(certInputs)) {
+                            acc += +input.dataset.count;
+                        }
+                        return acc;
+                    }
+
+                    function checkReusableCert() {
+                        const certInputs = document.querySelectorAll(
+                            ".certificate__input__js"
+                        );
+                        for (input of Array.from(certInputs)) {
+                            if (+input.dataset.count === 0) return true;
+                        }
+                        return false;
+                    }
+
+                    function showActiveCertificates(count) {
+                        const totalPrice = document.querySelector("#total-price")
+                        const numbers = document.querySelector("#players-number")
+                        const price = document.getElementById("price-block").innerText
+                        const updateNumbers = parseInt(numbers.innerText) - count
+                        const updatePrice = updateNumbers * parseInt(price)
+                        totalPrice.textContent = parseInt(numbers.innerText) < count ? 0 : updatePrice;
+                        activeCertificates.style.display = "block";
+                        activeCertificates.innerHTML = `Активировано сертификатов на <span class="span-link">${count}</span> человек`;
+                    }
+
+                    function hideActiveCertificates() {
+                        activeCertificates.innerHTML = "";
+                        activeCertificates.style.display = "none";
+                    }
+
+                    window.renderSelectExtraPayment = function (flag) {
+                        const selector = document.querySelector(
+                            "#extra-payment-select"
+                        );
+                        if (flag) {
+                            $("#surcharge").barrating("destroy");
+                            const selectedValue = $("#example").val();
+                            const certPeople = countCertPeople();
+                            const hasReusableCert = checkReusableCert();
+
+
+                            const count =
+                                selectedValue - certPeople - window.promocodePeople;
+                            if (!isReserve) {
+                                if (
+                                    (isOfflineGame && (count <= 0 || freeSlots < count)) ||
+                                    !response.payment_icon ||
+                                    !isOfflineGame
+                                ) {
+                                    paymentType.style.display = "none";
+                                    addCertBtn.style.display = "none";
+                                    cash.click();
+                                } else {
+                                    paymentType.style.display = "block";
+                                    addCertBtn.style.display = "initial";
+                                    card.click();
+                                }
+                                if (!response.payment_icon) {
+                                    addCertBtn.style.display = "block";
+                                }
+                                if (
+                                    response.payment_icon === 1 ||
+                                    response.payment_icon === 8 ||
+                                    response.payment_icon === 7 ||
+                                    response.payment_icon === 2
+                                ) {
+                                    paymentType.style.display = "none";
+                                }
+                            }
+                            const numbers = document.querySelector("#players-number")
+                            numbers.textContent = selectedValue
+
+                            const options = renderOptions(count);
+                            selector.innerHTML = `
+                <label for="name" class='payment-title'>Оплатить за</label>
+                <select id="surcharge" name="QpRecord[surcharge]" style="display: none">
+                  ${options}
+                </select>
+              `;
+                            $("#surcharge").barrating({
+                                theme: "bars-square",
+                                showValues: true,
+                                showSelectedRating: false,
+                            });
+                            const selectCountPeopleToPay =
+                                document.querySelector("#surcharge");
+                            selectCountPeopleToPay.onchange = showToPayText;
+                            if (freeSlots < selectedValue) {
+                                toggleContentWhenFewSlots(true);
+                            } else toggleContentWhenFewSlots(false);
+
+                            if (certPeople >= selectedValue) {
+                                removeUnnecessaryCertificates();
+                                if (!isOfflinePayment) hideToPayText();
+                                addCertBtn.style.display = "none";
+                            } else {
+                                if (!isOfflinePayment) showToPayText();
+                            }
+
+                            const certificateMoreText = document.querySelector(
+                                ".certificate__more-text"
+                            );
+                            if (certPeople > selectedValue && !hasReusableCert) {
+                                certificateMoreText.style.display = "block";
+                                certificateMoreText.innerHTML = `<span class="span-link">
+                  Эй, да у вас бесплатных мест по сертификату больше, чем игроков в команде! 
+                  Если всё равно хотите активировать, жмите кнопку "Записаться на игру"
+                </span>`;
+                            } else {
+                                certificateMoreText.style.display = "none";
+                                certificateMoreText.innerHTML = "";
+                            }
+
+                            if (certPeople && !hasReusableCert)
+                                showActiveCertificates(certPeople);
+                            else hideActiveCertificates();
+                        } else {
+                            selector.innerHTML = "";
+                        }
+                    };
+
+                    if (isOfflineGame && !isWithReservation) {
+                        paymentType.style.display = "block";
+                        window.renderSelectExtraPayment(true);
+                        const selectCountPeopleToPay =
+                            document.querySelector("#surcharge");
+                        if (selectCountPeopleToPay) {
+                            selectCountPeopleToPay.onchange = showToPayText;
+                        }
+                        const checkboxes = document.querySelectorAll(".check-input");
+                        Array.from(checkboxes).forEach((checkbox) => {
+                            checkbox.onchange = (event) => {
+                                const isOnlineCheckbox = +event.target.value === 1;
+                                if (isOnlineCheckbox) {
+                                    countPeopleToPayBlock.style.display = "block";
+                                    modalFormButton.value = "Оплатить игру";
+                                    window.offlinePay
+                                        ? (modalFormButton.value = "Записаться на игру")
+                                        : "";
+                                    showToPayText();
+                                } else {
+                                    countPeopleToPayBlock.style.display = "none";
+                                    modalFormButton.value = "Записаться на игру";
+                                    hideToPayText();
+                                }
+                            };
+                        });
+
+                        function hideToPayText() {
+                            toPay.innerHTML = "";
+                            toPay.style.display = "none";
+                        }
+
+                        /*if (!isOnlyOnSpotPayment) {
+                            firstSelector = document.getElementById("example");
+                            console.log(firstSelector)
+                            firstSelector.onchange = (e) => {
+                                window.renderSelectExtraPayment(true);
+                            };
+                        }*/
+                    } else {
+                        paymentType.style.display = "none";
+                        window.renderSelectExtraPayment(false);
+                    }
+
+                    function renderOptions(count) {
+                        let options = "";
+                        for (let i = 1; i <= count; i++) {
+                            options += `<option value='${i}' ${
+                                i === 1 ? "selected" : ""
+                            }>${i}</option>`;
+                        }
+                        const totalPrice = document.querySelector("#total-price")
+                        const numbers = document.querySelector("#players-number")
+                        const price2 = document.getElementById("price-block").innerText
+                        const update = parseInt(count) * parseInt(price2)
+                        totalPrice.textContent = update
+
+                        return options;
+                    }
+
+                    function showToPayText() {
+                        if (!isReserve && !isOnlyOnSpotPayment) {
+                            const form = document.querySelector("form");
+                            const countPeople = form.elements["QpRecord[surcharge]"]
+                                ? form.elements["QpRecord[surcharge]"].value
+                                : 0;
+                            total = price * countPeople;
+                            toPay.innerHTML = `Сумма к оплате: <span class="span-link">${
+                                total ? total + currency : "бесплатно"
+                            }</span>`;
+                            toPay.style.display = "block";
+                        }
+                    }
+
+                    function toggleContentWhenFewSlots(flag) {
+                        if (flag) {
+                            if (paymentType) paymentType.style.display = "none";
+                            if (cash) cash.click();
+                            modalFormButton.value = "Записаться на игру";
+                        }
+                    }
+
+                    if (!isOnlyYandexPayment || isWithReservation || isReserve) {
+                        cash.click();
+                        modalFormButton.value = "Записаться на игру";
+                    } else {
+                        modalFormButton.value = "Оплатить игру";
+                    }
+
+                    if (isOfflineGame) {
+                        addCertBtn.style.display = "initial";
+                    } else {
+                        addCertBtn.style.display = "none";
+                        resetCertificates();
+                    }
+
+                    /** таймер */
+                    var responseDateString = response.expire + "Z";
+                    var reservationExpire =
+                        Date.parse(responseDateString.replace(" ", "T")) +
+                        1000 * 60 * 5;
+
+                    timeInterval = setInterval(function () {
+                        var total = getTimeRemaining(reservationExpire);
+
+                        $("#reservation-timer").html(
+                            total.minutes +
+                            ":" +
+                            (total.seconds < 10 ? "0" : "") +
+                            total.seconds
+                        );
+                        if (total.total <= 0) {
+                            clearInterval(timeInterval);
+                        }
+                    }, 1000);
+
+                    function getTimeRemaining(endTime) {
+                        var total = endTime - Date.parse(new Date());
+                        var seconds = Math.floor((total / 1000) % 60);
+                        var minutes = Math.floor((total / 1000 / 60) % 60);
+                        var hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+                        var days = Math.floor(total / (1000 * 60 * 60 * 24));
+                        return {
+                            total,
+                            days,
+                            hours,
+                            minutes,
+                            seconds,
+                        };
+                    }
+
+                    var $wrap = $(".mfp-content");
+                    $wrap.find('textarea, input[type="text"]').val("");
+
+                    if (response.hasOwnProperty('game_difficulty')) {
+                        $wrap.find('.schedule-block-info-bar-game_difficulty').html(response.game_difficulty);
+                    }
+
+                    if (typeof content_id != "undefined" && content_id) {
+                        $wrap.find("#qprecord-site_content_id").val(content_id);
+                    }
+                    if (response.custom_fields) {
+                        const fields = response.custom_fields;
+
+                        $wrap.find("#custom").html(fields);
+
+                        const mapCustomFields = () => {
+                            return fields.map((field) => {
+                                let fieldType = '';
+                                if (field.isRequired === undefined) {
+                                    field.isRequired = false;
+                                }
+
+                                switch (field.type) {
+                                    case 'textarea':
+                                        fieldType = `<textarea title='${field.label}' class='input w-input custom' type='${field.type}' data-field-name='${field.name}' placeholder='${field.placeholder}' data-field-isRequired='${field.isRequired}'></textarea>`;
+                                        break;
+                                    case 'radio':
+                                        fieldType += '<div class="radio-group">';
+
+                                        field.values.forEach((item, key) => {
+                                            fieldType += `<input name='field_radio' title='${field.label}' value='${item}' id='${field.name + key}' class='custom-radio custom' type='${field.type}' data-field-name='${field.name}' placeholder='${field.placeholder}'  data-field-isRequired='${field.isRequired}'>`;
+                                            fieldType += `<label class="label" for="${field.name + key}">${item}</label>`;
+                                        });
+
+                                        fieldType += '</div>';
+
+                                        break;
+                                    default:
+                                        fieldType = `<input title='${field.label}' class='input w-input custom' type='${field.type}' data-field-name='${field.name}' placeholder='${field.placeholder}'  data-field-isRequired='${field.isRequired}'>`;
+                                }
+
+                                return (
+                                    `<div class="custom_fields"><label class='label' for='` +
+                                    field.name +
+                                    `'>` +
+                                    field.label +
+                                    `</label>` +
+                                    fieldType + '<div class="help-block"></div></div>'
+                                );
+                            });
+                        };
+                        $wrap.find("#custom").html(mapCustomFields());
+                    }
+
+                    $wrap.find('button[type="submit"]').removeClass("disabled");
+                    $wrap.find('button[type="submit"]').removeAttr("disabled");
+                    resetFormButton();
+                    const numberGame = response.numberGame[0] === '#' ? response.numberGame : `#${response.numberGame}`
+                    $wrap.find(".subhead-text-offline").css("display","flex").css("justify-content",'center')
+                    $wrap.find(".subhead-text-online").css("display","flex").css("justify-content",'center')
+                    if (response.game_type === 1) $wrap.find(".subhead-text-offline").css("display","none")
+                    else $wrap.find(".subhead-text-online").css("display","none")
+                    $wrap.find(".schedule-block-title").css("max-width","320px").text(`${response.nameGame} ${response.numberGame ? numberGame: ''}` );
+                    if (response.covid_free) {
+                        $wrap.find(".text-cov").show();
+                        if (response.covid_free_general) {
+                            $wrap
+                                .find(".covid_free_general")
+                                .text(response.covid_free_general);
+                        } else {
+                            $wrap
+                                .find(".covid_free_general")
+                                .text("Аттеншн! Для входа в бар нужен паспорт и QR-код");
+                        }
+                        if (response.covid_free_description) {
+                            $wrap
+                                .find(".covid_free_description")
+                                .text(response.covid_free_description);
+                        } else {
+                            $wrap.find(".open-popup-link_mod").hide();
+                        }
+                    }
+                    if (response.no_covid) {
+                        $wrap.find(".text-cov").show();
+                        if (response.no_covid_general) {
+                            $wrap
+                                .find(".covid_free_general")
+                                .text(response.no_covid_general);
+                        }
+                        $wrap.find(".open-popup-link_mod").hide();
+                    }
+
+                    $wrap
+                        .find(".schedule-block-title-number")
+                        .text(response.numberGame);
+                    $wrap
+                        .find(".schedule-block-info-time")
+                        .html(
+                            response.blockData + " " + response.at + " " + response.time
+                        );
+
+                    if (response.blockNumberIs) {
+                        $wrap
+                            .find(".schedule-block-player-this")
+                            .html(response.blockNumberIs);
+                        $wrap
+                            .find(".schedule-block-player-max")
+                            .html(response.blockOf);
+                        $wrap.find(".schedule-block-player").show();
+                    } else {
+                        $wrap.find(".schedule-block-player").hide();
+                    }
+                    $wrap.find(".schedule-block-info-bar").html(response.place);
+                    $wrap
+                        .find(".schedule-block-info-adress")
+                        .html(response.address);
+                    $wrap
+                        .find(".blockClockText")
+                        .html(response.at + " " + response.time);
+                        const data = response.text.split(",")
+                        const template = `<div class="new-price-game">
+                                        <span class="price-form">${response.price}</span>
+                                        <span class="text-form" style="font-size: 37px;">/</span>
+                                        <div class="text-form">
+                                            <div>${data[0]}</div>
+                                            <div>${data[1]}</div>
+                                        </div>
+                                    </div>`
+                        $wrap
+                            .find(".schedule-block-title-number").html(template)
+                    if (response.hide_age || response.free_status == 1) {
+                        $wrap
+                            .find(".shedule-block-info-ages")
+                            .html("Вход для всех участников платный");
+                    } else if (response.free_status == 2) {
+                        $wrap
+                            .find(".shedule-block-info-ages")
+                            .html("Ваш ребенок до 12 лет может пройти бесплатно");
+                    } else if (response.free_status == 3) {
+                        $wrap
+                            .find(".shedule-block-info-ages")
+                            .html("Ваш ребенок до 7 лет может пройти бесплатно");
+                    } else if (response.free_status == 5) {
+                        $wrap
+                            .find(".shedule-block-info-ages")
+                            .html("Ваш ребенок до 10 лет может пройти бесплатно");
+                    } else if (response.free_status == 18) {
+                        $wrap
+                            .find(".shedule-block-info-ages")
+                            .html("Вход 18+");
+                    }
+                    $wrap
+                            .find(".shedule-block-info-ages")
+                            .css("color","#111111")
+                        $wrap
+                            .find(".schedule-block-info-payment-method")
+                            .attr(
+                                "src",
+                                `themes/b4/images/info.png`
+                            ).css("opacity","1")
+                    $wrap.find("#qprecord-game_id").val(id);
+
+                    // cкрываем доп. надпись если лига TEENS
+                    this.varSubDescription = $(".js-sub-description__Game", $wrap);
+                    if (response.is_teens) {
+                        this.varSubDescription.hide();
+                    } else {
+                        this.varSubDescription.show();
+                    }
+
+                    if (response.reservation) {
+                        currentId = response.reservation;
+                        // initializeClock();
+                        $wrap.find("#qprecord-reservation").val(response.reservation);
+                        $wrap.find("#reservation-p").show();
+                    } else {
+                        $wrap.find("#reservation-p").hide();
+                    }
+
+                    if (response.status == 1) {
+                        if (
+                            isOfflineGame &&
+                            !isWithReservation &&
+                            (isOnlyYandexPayment || isCashOrYandexPayment)
+                        ) {
+                            paymentType.style.display = "block";
+                        } else {
+                            paymentType.style.display = "none";
+                        }
+                        if (freeSlots < Math.round(response.max_players / 2)) {
+                            paymentType.style.display = "none";
+                        } else {
+                            if (isCashOrYandexPayment) {
+                                paymentType.style.display = "block";
+                            }
+                        }
+                        $("#certificate").show();
+                        $wrap.find("#qprecord-reserve").val(0);
+                        $wrap.find(".text-warning").hide();
+                        $wrap.find("#queue-warning").hide();
+                        if (response.count < 9) {
+                            selectPeoples.insertAdjacentHTML(
+                                "afterend",
+                                `
+                <div id='free-place'>
+                  На игре осталось место для одной команды до ${response.count} человек. 
+                  Если вас больше, вы попадете в список резерва.
+                </div>
+              `
+                            );
+                        }
+                    } else if (isReserve) {
+                        paymentType.style.display = "none";
+                        $wrap.find(".text-warning").show();
+                        $(".text-warning").text(
+                            "Внимание, вы регистрируетесь в резерв! Вам нужно дождаться уведомления от нас, что места появились и можно приходить."
+                        );
+                    } else if (response.status == 5 && !response.reservation) {
+                        paymentType.style.display = "block";
+                        $("#certificate").show();
+                        $wrap.find("#qprecord-reserve").val(1);
+                        $wrap.find(".text-warning").hide();
+                        $wrap.find("#queue-warning").show();
+                        $wrap.find("#reservation-p").hide();
+                    } else {
+                        paymentType.style.display = "block";
+                        $wrap.find("#qprecord-reserve").val(1);
+                        $("#certificate").hide();
+                        $wrap.find("#queue-warning").hide();
+                        $wrap.find(".text-warning").hide();
+                    }
+
+                    if (
+                        (isOfflineGame && isOnlyYandexPayment && !isReserve) ||
+                        (isOnlinePayment && !isReserve)
+                    ) {
+                        $(".cerf-radio").hide();
+                        $(".firstRadio").attr("checked", false);
+                        $(".secondRadio").attr("checked", true);
+                        $(".payment-men").show();
+                        $(".payment-undertext").hide();
+                        $(".payment-title").html("Оплатить за");
+                        toPay.style.display = "block";
+                        toPay.innerHTML = `Сумма к оплате: <span class="span-link">${
+                            price + currency
+                        }</span>`;
+                    }
+                }
+
+                $(".game-form-block.popup-form.w-form").attr("data-isOnline", response.game_type);
+
+                if (response.game_type === 1) {
+                    if (typeof paymentType !== "undefined")
+                        paymentType.style.display = "none";
+                        const calculator = document.querySelector(".price-calculator")
+                        if (calculator) calculator.style.display = "none";
+                    $wrap.find(".text-warning").show();
+
+                    $(".text-warning").text(
+                        "Подробную инструкцию, как играть, со всеми нужными ссылками вы получите за час до игры на указанные при регистрации эл.почту и телефон."
+                    );
+                }else {
+                    const calculator = document.querySelector(".price-calculator")
+                    if (calculator) calculator.style.display = "flex";
+                }
+
+                if (typeof window["fbq"] == "function") {
+                    fbq("track", "InitiateCheckout");
+                }
+            });
+        },
+        getAddressFirstGame: function () {
+            return $this.firstAddress;
+        },
+        setAddressFirstGame: function (firstAddress) {
+            $this.firstAddress = firstAddress;
+        },
+    };
+})();

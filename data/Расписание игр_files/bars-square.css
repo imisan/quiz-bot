@@ -1,0 +1,86 @@
+.br-theme-bars-square .br-widget {
+  height: 15px;
+  white-space: nowrap;
+}
+.br-theme-bars-square .br-widget a {
+  display: block;
+  box-sizing: content-box;
+  width: 40px;
+  height: 40px;
+  float: left;
+  background-color: #c6c6c6;
+  /* margin: 5px; */
+  padding: 5px;
+  text-decoration: none;
+  font-size: 0px;
+  font-weight: 400;
+  line-height: 2;
+  text-align: center;
+  font-family: Akrobat, sans-serif;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 999px;
+  background-clip: content-box;
+  background-image: url('https://cdn1.quizplease.com/old_static/themes/b4/images/people-icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+@media(max-width: 502px) {
+  .br-theme-bars-square .br-widget a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    font-size: 15px !important;
+    background-size: 60% 60%;
+  }
+}
+@media(max-width: 412px) {
+  .br-theme-bars-square .br-widget a {
+    width: 25px;
+    height: 25px;
+  }
+}
+@media(max-width: 367px) {
+  .br-theme-bars-square .br-widget a {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.br-theme-bars-square .br-widget a.br-active,
+.br-theme-bars-square .br-widget a.br-selected {
+  background: #6937d2;
+  background-clip: content-box;
+	font-size: 18px;
+  color: #fff;
+}
+.br-theme-bars-square .br-widget .br-current-rating {
+  clear: both;
+  width: 330px;
+  text-align: center;
+  font-weight: 600;
+  display: block;
+  padding: .5em 0;
+  color: #646464;
+}
+.br-theme-bars-square .br-readonly a {
+  cursor: default;
+}
+.br-theme-bars-square .br-readonly a.br-active,
+.br-theme-bars-square .br-readonly a.br-selected {
+  border: 2px solid #729bf8;
+  color: #729bf8;
+}
+@media print {
+  .br-theme-bars-square .br-widget a {
+    border: 2px solid #b3b3b3;
+    color: #b3b3b3;
+  }
+  .br-theme-bars-square .br-widget a.br-active,
+  .br-theme-bars-square .br-widget a.br-selected {
+    border: 2px solid black;
+    color: black;
+  }
+}

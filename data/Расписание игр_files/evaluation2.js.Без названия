@@ -1,0 +1,69 @@
+$("#range").ionRangeSlider({
+			hide_min_max: true,
+			keyboard: true,
+			min: 2,
+			max: $('.numberOfPersonsList li').length + 1,
+  		onStart: function(data) {
+
+  		},
+  		onChange: function(data) {
+				 
+  			var arrayList = $('.numberOfPersonsList li');
+  			var arrayListElement = $('.numberOfPersonsList li').text();
+
+  			//var myIndex = parseInt($("#range").val())-1;
+  			var myIndex = data.from - data.min;
+  			for (var i = 0; i < myIndex; i++) {
+  				$(arrayList[i]).addClass('active').removeClass('inactive').removeClass('chosen');
+  			}
+  			for (var i = myIndex; i < arrayList.length; i++) {
+  				$(arrayList[i]).removeClass('active').removeClass('chosen').addClass('inactive');
+  			}
+  			$(arrayList[myIndex]).removeClass('inactive').addClass('chosen');
+  		}
+  	});
+
+  	slider = $("#range").data("ionRangeSlider");
+  	$('.popup-youtube').magnificPopup({
+  		disableOn: 700,
+  		type: 'iframe',
+  		mainClass: 'mfp-fade',
+  		removalDelay: 160,
+  		preloader: false,
+  		fixedContentPos: false
+		});
+		
+		var ranges = [0, 1, 2, 3]
+
+		for (let index in ranges) {
+			$("#range" + index).ionRangeSlider({
+				hide_min_max: true,
+				keyboard: true,
+				min: 1,
+				max: 10,
+				grid: false,
+				from_min: 1,
+				onChange: function(data) {
+					var arrayList = $('.numberOfPersonsList' + index + ' li');
+					var arrayListElement = $('.numberOfPersonsList li').text();
+
+					var myIndex = data.from - data.min;
+					for (var i = 0; i < myIndex; i++) {
+						$(arrayList[i]).addClass('active').removeClass('inactive').removeClass('chosen');
+					}
+					for (var i = myIndex; i < arrayList.length; i++) {
+						$(arrayList[i]).removeClass('active').removeClass('chosen').addClass('inactive');
+					}
+					$(arrayList[myIndex]).removeClass('inactive').addClass('chosen');
+				}
+			});	
+			slider = $("#range" + index).data("ionRangeSlider");
+			$('.popup-youtube').magnificPopup({
+				disableOn: 700,
+				type: 'iframe',
+				mainClass: 'mfp-fade',
+				removalDelay: 160,
+				preloader: false,
+				fixedContentPos: false
+			});
+		}

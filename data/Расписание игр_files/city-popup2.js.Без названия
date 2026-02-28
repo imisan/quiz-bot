@@ -1,0 +1,46 @@
+/*
+
+var state_menu = false;
+$('.w-dropdown').click(function () {
+    state_menu = !state_menu;
+    var list = $(this).children('.w-dropdown-list');
+    if(!state_menu)
+        list.addClass('w--open');
+    else
+        list.removeClass('w--open');
+})
+
+// Mune from mobile
+
+function showMobileMenu(){
+
+    var menu = $('.w-nav-menu').addClass('w--nav-menu-open')
+    $('.w-nav-overlay').height(window.innerHeight)
+    $('.w-nav-overlay').show().append(menu)
+}
+
+$('.w-nav-button').click(function () {
+    alert('menu');
+    showMobileMenu()
+})*/
+$('.JS-SetCity').click(function(){
+    $.get("/ajax/set-city", {"city" : $(this).data("city")}, function(response){
+        if(response.success){
+            $(".webantheader-region-confirm").remove();
+
+        }
+    });
+    $(".webant-header-region-confirm").remove();
+})
+
+$('.JS-Cancel').click(function () {/*
+
+    $('.w-dropdown-toggle').eq(1).trigger('tap')
+
+    var dropdown = $(popup).prev('.w-dropdown-toggle').trigger('tap')
+    dropdown.trigger('tap')*/
+    var popup = $(this).closest('.webant-header-region-confirm');
+    $(popup).siblings('.w-dropdown-list').addClass('w--open')
+    $(".webant-header-region-confirm").remove();
+
+})

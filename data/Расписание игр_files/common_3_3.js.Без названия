@@ -1,0 +1,1385 @@
+$(function () {
+  var $menu = $(".header-top-menu");
+  $(window).scroll(function () {
+    if ($(this).scrollTop() > 100 && !$menu.hasClass("fixed")) {
+      $menu.removeClass("default").addClass("fixed");
+    } else if ($(this).scrollTop() <= 100 && $menu.hasClass("fixed")) {
+      $menu.removeClass("fixed").removeClass("fixed");
+    }
+    if ($(this).scrollTop() > 100 && $menu.hasClass("fixed")) {
+      if ($(window).scrollLeft()) {
+        $menu.css({
+          left: -$(window).scrollLeft(),
+        });
+      }
+    }
+  });
+  function resetFormButton() {
+    var formButton = $("#form-button");
+    formButton.attr("disabled", false);
+    formButton.removeClass("button-disabled");
+  }
+
+  //scroll
+
+  $(".header-mobil-menu").on("click", function (e) {
+    e.preventDefault();
+    $(".header-nav").width($(window).width()).show("fast").css("left", 0);
+  });
+
+  $(".header-mobil-back").on("click", function (e) {
+    e.preventDefault();
+    $(".header-nav")
+      .width($(window).width())
+      .css({
+        left: -$(window).width(),
+      })
+      .hide("fast");
+  });
+
+  $(".header-region").click(function (e) {
+    if ($(".header-region-confirm").length) {
+      $(".header-region-confirm").show();
+      $(".header-region-list")
+        .find(".header-region-active")
+        .removeClass("header-region-active");
+
+      return false;
+    }
+    if (!$(this).hasClass("header-region-open")) {
+      e.preventDefault();
+      $(".header-region").toggleClass("header-region-open");
+      $(".total-city").toggleClass("total-city-open");
+    } else {
+      if (e.target.tagName != "A" && e.target.tagName != "a") {
+        $(".header-region").removeClass("header-region-open");
+        $(".total-city").removeClass("total-city-open");
+      }
+    }
+  });
+
+  $(document).click(function (event) {
+    if (!$(event.target).closest(".header-region").length) {
+      $(".header-region").removeClass("header-region-open");
+      $(".total-city").removeClass("total-city-open");
+    }
+  });
+
+  $(".header-language").click(function (e) {
+    $(".header-language-list").toggle();
+    $(".header-language").toggleClass("header-language-active");
+  });
+
+  /*if($(window).width()>767){
+		slider=$(".bgBlock-bottom-slider").slick({
+			slidesToShow: 3,
+			slidesToScroll: 1,
+			arrows: true,
+			infinite: true,
+			speed: 100,
+			prevArrow: "<p class='bgBlock-bottom-slider-arrow slider-arrow slider-arrow-prevArrow'></p>",
+			nextArrow: "<p class='bgBlock-bottom-slider-arrow slider-arrow slider-arrow-nextArrow'></p>",
+			responsive: [
+				{
+				  breakpoint: 991,
+				  settings: {
+					slidesToShow: 2
+				  }
+				},
+				{
+				  breakpoint: 767,
+				  settings: {
+					slidesToShow: 2,
+					vertical: true,
+					adaptiveHeight: true,
+					arrows: false,
+					draggable: false
+				  }
+				}
+			]
+		});
+	}*/
+
+  $(".bgBlock-bottom-slider-item").show();
+  $(".game-slider").slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+    lazyLoad: "progressive",
+    speed: 100,
+    nextArrow:
+      '<button type="button" class="slick-next" style="background: url(../img/nextArrow.svg); background-size: contain;">Next</button>',
+    prevArrow:
+      '<button type="button" class="slick-prev" style="background: url(../img/prevArrow.svg); background-size: contain;">Previous</button>',
+  });
+  $(".what-happens-photo-slider").slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+    infinite: false,
+    lazyLoad: "ondemand",
+    speed: 100,
+    prevArrow:
+      "<p class='what-happens-photo-slider-arrow slider-arrow slider-arrow-prevArrow'></p>",
+    nextArrow:
+      "<p class='what-happens-photo-slider-arrow slider-arrow slider-arrow-nextArrow'></p>",
+  });
+  tryReload();
+
+  $(".what-happens-photo-slider").on("afterChange", function () {
+    tryReload();
+    setSliderHeight();
+  });
+  $(".what-happens-questions-slider").slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+    infinite: true,
+    centerPadding: 0,
+    speed: 100,
+    initialSlide: Math.round(Math.random() * 9),
+    prevArrow:
+      "<p class='what-happens-questions-slider-arrow slider-arrow slider-arrow-prevArrow'></p>",
+    nextArrow:
+      "<p class='what-happens-questions-slider-arrow slider-arrow slider-arrow-nextArrow'></p>",
+  });
+
+  function mapWidth() {
+    var bodyWidth = $("body").width(),
+      containerWidth = $("#container").outerWidth(),
+      blockWidth = $(".js-game-info").outerWidth();
+    var paddingWidth = (bodyWidth - containerWidth) / 2 + 15;
+    var mapBlockWidth = bodyWidth - blockWidth - paddingWidth;
+    $(".container-fluid").css({
+      "padding-left": paddingWidth,
+    });
+    $(".map").width(mapBlockWidth);
+  }
+
+  function heightItem() {
+    $(".bgBlock-bottom-slider-item a").removeAttr("style");
+    $(".bgBlock-bottom-slider-item a").outerHeight(
+      $(".bgBlock-bottom-slider .slick-list").height()
+    );
+  }
+
+  function clearLayer() {
+    var footerHeight = $(".footer").outerHeight();
+    $(".footer").css({
+      "margin-top": -footerHeight,
+    });
+    $(".layer-clear").css({
+      "padding-bottom": footerHeight,
+    });
+  }
+
+  mapWidth();
+  heightItem();
+  clearLayer();
+  $(window).resize(function () {
+    mapWidth();
+    marginBottom();
+    heightItem();
+    clearLayer();
+    $(".header-nav").width($(window).width());
+  });
+
+  $("#range").ionRangeSlider({
+    hide_min_max: true,
+    keyboard: true,
+    min: 2,
+    max: $(".numberOfPersonsList li").length + 1,
+    onStart: function (data) {
+      /*$("#price-from").val(data.from);
+			 $("#price-to").val(data.to);          */
+    },
+    onChange: function (data) {
+      //var valArray=splitArray($("#range"));
+      /*$("#price-from").val(valArray[0]);
+			 $("#price-to").val(valArray[1]);*/
+      var arrayList = $(".numberOfPersonsList li");
+      var arrayListElement = $(".numberOfPersonsList li").text();
+
+      //var myIndex = parseInt($("#range").val())-1;
+      var myIndex = data.from - data.min;
+      for (var i = 0; i < myIndex; i++) {
+        $(arrayList[i])
+          .addClass("active")
+          .removeClass("inactive")
+          .removeClass("chosen");
+      }
+      for (var i = myIndex; i < arrayList.length; i++) {
+        $(arrayList[i])
+          .removeClass("active")
+          .removeClass("chosen")
+          .addClass("inactive");
+      }
+      $(arrayList[myIndex]).removeClass("inactive").addClass("chosen");
+    },
+  });
+
+  slider = $("#range").data("ionRangeSlider");
+  $(".popup-youtube").magnificPopup({
+    disableOn: 700,
+    type: "iframe",
+    mainClass: "mfp-fade",
+    removalDelay: 160,
+    preloader: false,
+    fixedContentPos: false,
+  });
+
+  initMap(0);
+
+  magnificPopup = $.magnificPopup.instance;
+  $(".popup-with-form").magnificPopup({
+    type: "inline",
+    preloader: false,
+    focus: "#name",
+    fixedContentPos: false,
+
+    // When elemened is focused, some mobile browsers in some cases zoom in
+    // It looks not nice, so we disable it:
+    callbacks: {
+      open: function (item) {
+        var $target = magnificPopup.currItem.el;
+        const typeCertificate = $target.data("certificate");
+        const paperBlock = document.querySelector(".paper-block");
+        const electronicBlock = document.querySelector(".electronic-block");
+        const typeCertificateBlock = document.querySelector(
+          ".type-certificate-block"
+        );
+
+        const deliveryOnGame = deliveryBlock.querySelector("input");
+
+        if (typeCertificate) {
+          $(".offline").click();
+          show(typeCertificateBlock);
+          if (deliveryBlock.contains(onlineDelivery)) {
+            deliveryBlock.removeChild(onlineDelivery);
+          }
+          $(".kind-certificate-input-online").click();
+          hide(paperBlock);
+        } else {
+          $(".type-game-input-online").click();
+          if (deliveryBlock.contains(onlineDelivery)) {
+            deliveryBlock.removeChild(onlineDelivery);
+          }
+          $(".online").click();
+          hide(paperBlock);
+          hide(electronicBlock);
+        }
+
+        function hide(block) {
+          block.style.display = "none";
+        }
+
+        function show(block) {
+          block.style.display = "inline";
+        }
+
+        function resetBlockInputs(block) {
+          const inputs = block.querySelectorAll("input");
+          inputs.forEach((input) => {
+            if (input.checked) input.checked = false;
+          });
+        }
+
+        var $wrap = $(".mfp-content");
+        $wrap.find('textarea, input[type="text"]').val("");
+
+        $wrap.find('button[type="submit"]').removeClass("disabled");
+        $wrap.find('button[type="submit"]').removeAttr("disabled");
+        resetFormButton();
+
+        if ($(window).width() < 700) {
+          this.st.focus = false;
+        } else {
+          this.st.focus = "#name";
+        }
+        mapWidth;
+      },
+    },
+  });
+
+  $(".tips").magnificPopup({
+    type: "inline",
+    mainClass: "mfp-fade mfp-tips",
+  });
+
+  $(".calc-modal").click(function () {
+    $.magnificPopup.open({
+      items: {
+        src: "#calcRaiting", // can be a HTML string, jQuery object, or CSS selector
+        type: "inline",
+        preloader: false,
+        mainClass: "mfp-ready",
+        focus: "#calcRaiting",
+        fixedContentPos: false,
+      },
+    });
+  });
+
+  $(".blanks-modal").click(function () {
+    $.magnificPopup.open({
+      items: {
+        src: "#blanksModal", // can be a HTML string, jQuery object, or CSS selector
+        type: "inline",
+        preloader: false,
+        mainClass: "mfp-ready",
+        focus: "#blanksModal",
+        fixedContentPos: false,
+      },
+    });
+  });
+
+  $(".stream-modal").click(function () {
+    $.magnificPopup.open({
+      items: {
+        src: "#streamCities", // can be a HTML string, jQuery object, or CSS selector
+        type: "inline",
+        preloader: false,
+        mainClass: "mfp-ready",
+        focus: "#streamCities",
+        fixedContentPos: false,
+      },
+    });
+  });
+
+  $(".lototron-modal").click(function () {
+    $.magnificPopup.open({
+      items: {
+        src: "#lototron", // can be a HTML string, jQuery object, or CSS selector
+        type: "inline",
+        preloader: false,
+        mainClass: "mfp-ready",
+        focus: "#lototron",
+        fixedContentPos: false,
+      },
+    });
+  });
+
+  $(".home-modal").click(function () {
+    $.magnificPopup.open({
+      items: {
+        src: "#homeRules", // can be a HTML string, jQuery object, or CSS selector
+        type: "inline",
+        preloader: false,
+        mainClass: "mfp-ready",
+        focus: "#homeRules",
+        fixedContentPos: false,
+      },
+    });
+  });
+
+  $(".fillter-open a").click(function () {
+    $(".filter-block-drop").slideToggle();
+    return false;
+  });
+  
+  $(document).on('click', 'div.ny_game_banner', function (eeee) {
+    window.location.href = 'https://game.quizplease.ru?utm_source=site&utm_medium=banner&utm_campaign=popupgamebannerdec2025';
+  });
+
+  $(document).on("submit", "form.gamesForm", function (e) {
+    //Change
+    e.preventDefault();
+
+    var th = $(this);
+    th.find('button[type="submit"]').attr("disabled", "disabled");
+    th.find('button[type="submit"]').addClass("disabled");
+    //регистрация события для Тюмени
+    if (typeof gtag_report_conversion === "function") {
+      gtag_report_conversion();
+    }
+    const gameId = document.querySelector(' form#gamesForm .game-id-input').value
+
+    $.ajax({
+      type: "POST",
+      url: th.attr("action"), //Change
+      data: th.serialize(),
+      dataType: "json",
+    }).done(function (response) {
+      if (response.redirect) {
+        window.location.href = response.link;
+      }
+      if (response.success) {
+        if (response.sameTeam) {
+          $("#notify").html(
+            '<div class="h2 h2-mb20">Упс! Что-то пошло не так.</div><div class="msg-success">' +
+              response.successMsg +
+              "</div>"
+          );
+
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            preloader: true,
+            type: "inline",
+          });
+          if ($("#notify").length != 0) {
+            // проверим существование элемента чтобы избежать ошибки
+            $("html, body").animate(
+              {
+                scrollTop: $("#notify").offset().top - 175,
+              },
+              500
+            ); // анимируем скроолинг к элементу
+          } else {
+          }
+        } else {
+          //saratov = 63
+          if (th.attr('data-city-id') == 63) {
+            typeof yaCounter80130940 != "undefined" &&
+              yaCounter80130940.reachGoal("TeamsRegistryCounter");
+            ga("send", "event", "TeamsRegistryCounter", "submit");
+            callAnalytics(
+              null,
+              null,
+              [
+                "track",
+                "CompleteRegistration",
+                {},
+                { eventID: `${getCookie('fb_eventID')}_${gameId}` },
+              ],
+              "complete_registration"
+            );
+          }
+          try {
+            yaCounter35711540.reachGoal("TeamsRegistryCounter");
+          } catch (error) {}
+          
+          if (th.attr('data-city-id') == 9) {
+            ga("send", "event", "TeamsRegistryCounter", "submit");
+            callAnalytics(
+                null,
+                null,
+                [
+                  "track",
+                  "CompleteRegistration",
+                  {},
+                  { eventID: `${getCookie('fb_eventID')}_${gameId}`},
+                ],
+                "complete_registration"
+            );
+          }
+
+          fetch(
+            `/ajax/send-facebook-event?cityId=${cityId}&event=CompleteRegistration`
+          );
+          // Mersin
+          if (window.city_id === 163) {
+
+          $("#notify").html(
+            `<img src="https://cdn1.quizplease.com/old_static/themes/b4/images/check-green.svg" alt="" class="message-icon"><div class="h2 h2-mb20">Спасибо, что записались!</div><div class="msg-success">
+						${response.successMsg}</div>
+						<div class="share-game share-game-center" style="margin-top: 15px;">
+              ${window.location.hostname.split('.').reverse()[0] != 'ru' && window.location.hostname.split('.').reverse()[0] != 'xn--p1ai'  ? `
+                <a href="http://www.facebook.com/sharer.php?s=100&p[url]=${response.game.url}" onclick="window.open(this.href, this.title, 'toolbar=0, status=0, width=548, height=325'); return false" title="Поделиться ссылкой на Фейсбук" target="_parent" class="social-link w-inline-block w-clearfix">
+                  <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/fb-white.svg" alt="" class="icon-2">
+                  <div>Поделиться</div>
+                </a>
+              ` : ''}
+
+							<a href="http://vkontakte.ru/share.php?url=${response.game.url}&title=${response.game.title}" onclick="window.open(this.href, this.title, 'toolbar=0, status=0, width=548, height=325'); return false"
+                	title="Сохранить в Вконтакте" target="_parent" class="social-link vk w-inline-block w-clearfix">
+                  <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/vk-white.svg" alt="" class="icon-2">
+                  <div>Поделиться</div>
+							</a>
+
+							<a href="https://api.whatsapp.com/send?text=${response.game.title} ${response.game.url}" rel="nofollow noopener" target="_blank"
+									class="social-link wats w-inline-block w-clearfix">
+									<img src="https://cdn1.quizplease.com/old_static/themes/b4/images/whatsapp-white.svg" alt="" class="icon-2">
+									<div>Вотсапнуть</div>
+							</a>
+
+							<a href="https://t.me/share/url?url=${response.game.url}&text=${response.game.title}"
+								target="_blank"
+								class="social-link telegram w-inline-block w-clearfix">
+									<img src="https://cdn1.quizplease.com/old_static/themes/b4/images/telegram-white.svg" alt="" class="icon-2">
+									<div>Отправить</div>
+							</a>
+
+						</div>
+            <div class="ny_game_banner"></div>
+`
+          );
+           } else {
+             $("#notify").html(
+               `<img src="https://cdn1.quizplease.com/old_static/themes/b4/images/check-green.svg" alt="" class="message-icon"><div class="h2 h2-mb20">Спасибо, что записались!</div><div class="msg-success">
+               ${response.successMsg}</div>
+               <div class="share-game share-game-center" style="margin-top: 15px;">
+                 ${window.location.hostname.split('.').reverse()[0] != 'ru' && window.location.hostname.split('.').reverse()[0] != 'xn--p1ai'  ? `
+                   <a href="http://www.facebook.com/sharer.php?s=100&p[url]=${response.game.url}" onclick="window.open(this.href, this.title, 'toolbar=0, status=0, width=548, height=325'); return false" title="Поделиться ссылкой на Фейсбук" target="_parent" class="social-link w-inline-block w-clearfix">
+                     <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/fb-white.svg" alt="" class="icon-2">
+                     <div>Поделиться</div>
+                   </a>
+                 ` : ''}
+  
+                 <a href="http://vkontakte.ru/share.php?url=${response.game.url}&title=${response.game.title}" onclick="window.open(this.href, this.title, 'toolbar=0, status=0, width=548, height=325'); return false"
+                     title="Сохранить в Вконтакте" target="_parent" class="social-link vk w-inline-block w-clearfix">
+                     <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/vk-white.svg" alt="" class="icon-2">
+                     <div>Поделиться</div>
+                 </a>
+  
+                 <a href="https://api.whatsapp.com/send?text=${response.game.title} ${response.game.url}" rel="nofollow noopener" target="_blank"
+                     class="social-link wats w-inline-block w-clearfix">
+                     <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/whatsapp-white.svg" alt="" class="icon-2">
+                     <div>Вотсапнуть</div>
+                 </a>
+  
+                 <a href="https://t.me/share/url?url=${response.game.url}&text=${response.game.title}"
+                   target="_blank"
+                   class="social-link telegram w-inline-block w-clearfix">
+                     <img src="https://cdn1.quizplease.com/old_static/themes/b4/images/telegram-white.svg" alt="" class="icon-2">
+                     <div>Отправить</div>
+                 </a>
+  
+               </div>
+            <div class="ny_game_banner"></div>
+`
+             );
+           }
+          
+          if (window.city_id == 24 || window.city_id == 'tmn') {
+            try {
+              ym(99163236,'reachGoal','SuccessfullyRegister');
+              ym(99163236,'reachGoal','TeamsRegistryCounter');
+            } catch (error) {}
+          }
+          if (window.city_id == 'saratov') {
+            typeof yaCounter80130940 != "undefined" &&
+              yaCounter80130940.reachGoal("TeamsRegistryCounter");
+            ga("send", "event", "TeamsRegistryCounter", "submit");
+          }
+          
+          try {
+            yaCounter35711540.reachGoal('TeamsRegistryCounter');
+          } catch (error) {}
+          if (window.city_id == 'moscow') {
+            ga("send", "event", "TeamsRegistryCounter", "submit");
+          }
+
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            preloader: true,
+            type: "inline",
+          });
+          if ($("#notify").length != 0) {
+            // проверим существование элемента чтобы избежать ошибки
+            $("html, body").animate(
+              {
+                scrollTop: $("#notify").offset().top - 175,
+              },
+              500
+            ); // анимируем скроолинг к элементу
+          } else {
+          }
+        }
+      } else {
+        th.find('button[type="submit"]').removeAttr("disabled");
+        th.find('button[type="submit"]').removeClass("disabled");
+        resetFormButton();
+        $(".errorMsg").remove();
+
+        if (response.successMsg) {
+          $("#notify").html(`
+						<div class="h2 h2-mb20">Упс! Что-то пошло не так.</div><div class="msg-success">${response.successMsg}</div>
+					`);
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            preloader: true,
+            type: "inline",
+          });
+
+          let phoneInput16 = $('.registerForTheGame #qprecord-phone-16');
+          if (phoneInput16) {
+            phoneInput16.val('');
+            phoneInput16.attr('style', '');
+          }
+        }
+        if (response.errorMsg) {
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            preloader: true,
+            type: "inline",
+          });
+          $("#notify").html(`
+						<div class="h2 h2-mb20">Упс! Что-то пошло не так.</div><div class="msg-success">${response.errorMsg}</div>
+					`);
+        }
+      }
+      ("");
+    });
+    return false;
+  });
+
+  $("#wantForm")
+    .on("beforeSubmit", function (e) {
+      var th = $(this);
+      th.find('button[type="submit"]').attr("disabled", "disabled");
+      th.find('button[type="submit"]').addClass("disabled");
+
+      $.ajax({
+        type: "POST",
+        url: th.attr("action"), //Change
+        data: th.serialize(),
+        dataType: "json",
+      }).done(function (response) {
+        if (response.success) {
+          $("#notify").html(
+            '<div class="msg-success">' + response.successMsg + "</div>"
+          );
+          try {
+            yaCounter35711540.reachGoal('CorpCounter');
+          } catch (error) {}
+          if (window.city_id == 'moscow') {
+            ga("send", "event", "CorpCounter", "submit");
+          }
+
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            type: "inline",
+          });
+        } else {
+          th.find('button[type="submit"]').removeAttr("disabled");
+          th.find('button[type="submit"]').removeClass("disabled");
+          resetFormButton();
+
+          $(".errorMsg").remove();
+          if (response.errorMsg) {
+            $.each(response.errorMsg, function (key, item) {
+              var $element = $("#" + th.attr("name") + "-" + key.toLowerCase());
+              $element.after('<p class="errorMsg">' + item[0] + "</p>");
+            });
+          }
+        }
+      });
+      return false;
+    })
+    .submit(function (e) {
+      e.preventDefault();
+    });
+
+  // $("#occupyTheCityForm").on('beforeSubmit', function (e) {
+  // 	var th = $(this);
+  // 	th.find('button[type="submit"]').attr('disabled', 'disabled');
+  // 	th.find('button[type="submit"]').addClass('disabled');
+
+  // 	$.ajax({
+  // 		type: "POST",
+  // 		url: th.attr('action'), //Change
+  // 		data: th.serialize(),
+  // 		dataType: 'json'
+  // 	}).done(function (response) {
+  // 		if (response.success) {
+  // 			$('#notify').html('<div class="msg-success">' +
+  // 				response.successMsg + '</div>');
+  // 			ga('send', 'event', 'CertificateCounter', 'submit')
+  // 			$.magnificPopup.open({
+  // 				items: {
+  // 					src: '#notify'
+  // 				},
+  // 				type: 'inline'
+  // 			});
+  // 		} else {
+  // 			th.find('button[type="submit"]').removeAttr('disabled');
+  // 			th.find('button[type="submit"]').removeClass('disabled');
+  // 			resetFormButton ()
+  // 			$('.errorMsg').remove();
+  // 			if (response.errorMsg) {
+  // 				$.each(response.errorMsg, function (key, item) {
+  // 					var $element = $('#' + th.attr('name') + '-' + key.toLowerCase());
+  // 					$element.after('<p class="errorMsg">' + item[0] + '</p>');
+  // 				});
+  // 			}
+  // 		}
+  // 	});
+  // 	return false;
+  // }).submit(function (e) {
+  // 	e.preventDefault();
+  // });
+
+  $("#occupyFranshise")
+    .on("beforeSubmit", function (e) {
+      var th = $(this);
+      th.find('button[type="submit"]').attr("disabled", "disabled");
+      th.find('button[type="submit"]').addClass("disabled");
+
+      $.ajax({
+        type: "POST",
+        url: th.attr("action"), //Change
+        data: th.serialize(),
+        dataType: "json",
+      }).done(function (response) {
+        if (response.success) {
+          $("#notify").html(
+            '<div class="msg-success">' + response.successMsg + "</div>"
+          );
+          try {
+            yaCounter35711540.reachGoal('FranchiseCounter');
+          } catch (error) {}
+          if (window.city_id == 'moscow') {
+            ga("send", "event", "FranchiseCounter", "submit");
+          }
+          
+          $.magnificPopup.open({
+            items: {
+              src: "#notify",
+            },
+            type: "inline",
+          });
+        } else {
+          th.find('button[type="submit"]').removeAttr("disabled");
+          th.find('button[type="submit"]').removeClass("disabled");
+          resetFormButton();
+          $(".errorMsg").remove();
+          if (response.errorMsg) {
+            $.each(response.errorMsg, function (key, item) {
+              var $element = $("#" + th.attr("name") + "-" + key.toLowerCase());
+              $element.after('<p class="errorMsg">' + item[0] + "</p>");
+            });
+          }
+        }
+      });
+      return false;
+    })
+    .submit(function (e) {
+      e.preventDefault();
+    });
+
+  function marginBottom() {
+    var bgBlock = $(".bgBlock-bg");
+    heightImg = $(".bgBlock-bg-logo img").height();
+
+    $(".bgBlock-bg-logo img").css({
+      height: bgBlock.outerHeight() * 1.2,
+    });
+  }
+
+  marginBottom();
+
+  // if ($('#where').length) {
+  // 	if ($('#where').attr('data-type') == 'google') {
+  // 		if (typeof (google) != 'undefined') {
+  // 			geocoder = new google.maps.Geocoder();
+  // 			var latlng = new google.maps.LatLng(39.305, -76.617);
+  // 			map = new google.maps.Map(document.getElementById('where'), {
+  // 				center: latlng,
+  // 				zoom: 14
+  // 			});
+  // 			google.maps.event.addListenerOnce(map, 'idle', function () {
+
+  // 				var address = Game.getAddressFirstGame();
+  // 				geocoder.geocode({
+  // 					'address': address
+  // 				}, function (results, status) {
+  // 					if (status == 'OK') {
+  // 						map.setCenter(results[0].geometry.location);
+  // 						var marker = new google.maps.Marker({
+  // 							map: map,
+  // 							position: results[0].geometry.location
+  // 						});
+  // 					}
+  // 				});
+  // 			});
+  // 		}
+  // 	} else {
+  // 		if (typeof (ymaps) != "undefined") {
+  // 			ymaps.ready(function () {
+  // 				map = new ymaps.Map("where", {
+  // 					center: [55.762166, 37.613063],
+  // 					zoom: 14
+  // 				});
+
+  // 				map.behaviors.disable('drag');
+  // 				var geocoder = ymaps.geocode(Game.getAddressFirstGame());
+  // 				geocoder.then(
+  // 					function (res) {
+  // 						placeMark = new ymaps.Placemark(res.geoObjects.get(0).geometry.getCoordinates(), {
+  // 							hintContent: Game.getAddressFirstGame(),
+  // 							balloonContent: Game.getAddressFirstGame()
+  // 						});
+  // 						map.geoObjects.add(placeMark);
+  // 						map.panTo(
+  // 							res.geoObjects.get(0).geometry.getCoordinates(), {
+  // 								flying: true
+  // 							}
+  // 						)
+  // 					}
+  // 				);
+  // 			});
+  // 		}
+  // 	}
+  // }
+
+  $(".what-happens-questions .btn").click(function () {
+    $(this).hide();
+    $(this).prev().show();
+    return false;
+  });
+
+  $(".faq-block").click(function () {
+    var _this = $(this);
+    _this.children(".faq-answer").slideToggle(function () {
+      _this.toggleClass("faq-block-open");
+    });
+  });
+
+  // управление поле в форме сертификата
+  $(".delivery input").change(function () {
+    if ($(this).val() == "courier") {
+      $(".js-delivery-address").show();
+    } else {
+      $(".js-delivery-address").hide();
+    }
+  });
+});
+
+function setCookie(name, value, options) {
+  options = options || {};
+
+  var expires = options.expires;
+
+  if (typeof expires == "number" && expires) {
+    var d = new Date();
+    d.setTime(d.getTime() + expires * 1000);
+    expires = options.expires = d;
+  }
+  if (expires && expires.toUTCString) {
+    options.expires = expires.toUTCString();
+  }
+
+  value = encodeURIComponent(value);
+
+  var updatedCookie = name + "=" + value;
+
+  for (var propName in options) {
+    updatedCookie += "; " + propName;
+    var propValue = options[propName];
+    if (propValue !== true) {
+      updatedCookie += "=" + propValue;
+    }
+  }
+
+  document.cookie = updatedCookie;
+}
+
+var refreshIntervalId = null;
+
+initTextPopup(".open-popup-link");
+initTextPopup(".open-popup-link_mod");
+
+function initTextPopup(selector) {
+  $(`${selector}`).click(function (e) {
+    e.preventDefault();
+  });
+
+  $(`${selector}`).on("click", function () {
+    $.magnificPopup.close();
+    $(this).magnificPopup("open");
+  });
+
+  $(`${selector}`).magnificPopup({
+    type: "inline",
+  });
+}
+
+function initMap(gameId) {
+  $(".techtext-halfwhite a").click(function (e) {
+    e.preventDefault();
+  });
+  $(" .techtext-halfwhite a").on("click", function (e) {
+    $.magnificPopup.close();
+    $(this).magnificPopup("open");
+  });
+  $(".techtext-halfwhite a").magnificPopup({
+    closeOnBgClick: false,
+    type: "ajax",
+    ajax: {
+      settings: {
+        method: "get",
+        url: "/ajax/get-map-game",
+        data: {
+          id: gameId,
+        },
+      },
+    },
+    mainClass: "mfp-fade mfp-map",
+    callbacks: {
+      parseAjax: function (mfpResponse) {},
+      ajaxContentAdded: function () {
+        if (refreshIntervalId != null) {
+          clearInterval(refreshIntervalId);
+        }
+        var address = $(".mfp-wrap").find(".hidden-address").val();
+        // $(this.content).find('.mfp-close').appendTo($('.mfp-close').parent().parent());
+        init();
+
+        function init() {
+          if ($("#maps").length) {
+            if ($("#maps").attr("data-type") == "google") {
+              geocoder = new google.maps.Geocoder();
+              var latlng = new google.maps.LatLng(39.305, -76.617);
+              map = new google.maps.Map(document.getElementById("maps"), {
+                center: latlng,
+                zoom: 14,
+              });
+              google.maps.event.addListenerOnce(map, "idle", function () {
+                geocoder.geocode(
+                  {
+                    address: address,
+                  },
+                  function (results, status) {
+                    if (status == "OK") {
+                      map.setCenter(results[0].geometry.location);
+                      var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                      });
+                    }
+                  }
+                );
+              });
+            } else {
+              myMap = new ymaps.Map("maps", {
+                center: [55.762166, 37.613063],
+                zoom: 14,
+              });
+
+              // myMap.behaviors.disable('drag');
+              var geocoder = ymaps.geocode(address);
+              geocoder.then(function (res) {
+                placeMark = new ymaps.Placemark(
+                  res.geoObjects.get(0).geometry.getCoordinates(),
+                  {
+                    hintContent: address,
+                    balloonContent: address,
+                  }
+                );
+                myMap.geoObjects.add(placeMark);
+                myMap.panTo(res.geoObjects.get(0).geometry.getCoordinates(), {
+                  flying: true,
+                });
+              });
+              // myMap.behaviors.disable('scrollZoom');
+            }
+          }
+        }
+      },
+    },
+  });
+}
+
+var tryReload = function () {
+  $(".slick-track")
+    .find("[id^='game_photos']")
+    .each(function (id, value) {
+      if ($(value).attr("aria-hidden") == "false") {
+        loadPhoto($(value).attr("id").split("game_photos")[1]);
+      }
+    });
+};
+
+var loaded = new Object();
+
+function loadPhoto(gameId) {
+  if (!loaded[gameId]) {
+    $.ajax({
+      type: "get",
+      url: "/ajax/load-photo",
+      data: {
+        id: gameId,
+      },
+      response: "text",
+      async: true,
+      success: function (data) {
+        var parsedData = JSON.parse(data);
+        divCore = $("#game_photos" + gameId);
+
+        var layer = $(document.createElement("div"));
+        layer.attr("class", "what-happens-photo-slider-item-layer");
+        divCore.append(layer);
+
+        var div1 = $(document.createElement("div"));
+        div1.attr("class", "what-happens-photo-slider-item-info");
+        divCore.append(div1);
+
+        var div2 = $(document.createElement("div"));
+        div1.append(div2);
+
+        var div3 = $(document.createElement("div"));
+        div3.attr("class", "what-happens-photo-slider-item-info-title");
+        div3.text(parsedData.name);
+        div2.append(div3);
+
+        var div4 = $(document.createElement("div"));
+        div4.attr("class", "what-happens-photo-slider-item-info-date");
+        div4.text(parsedData.date);
+        div2.append(div4);
+
+        var div5 = $(document.createElement("div"));
+        div2.append(div5);
+
+        var link = $(document.createElement("a"));
+        link.attr("href", parsedData.url);
+        link.attr("target", "_blank");
+        link.attr("class", "btn btn-warning");
+        if (window.city_id == 'moscow') {
+          link.attr(
+              "onclick",
+              "yaCounter35711540.reachGoal('visitedPhotoAlbum');ga('send', 'event', 'visitedPhotoAlbum', 'click');"
+          );
+        }
+
+        link.text(parsedData.text);
+        div5.append(link);
+
+        setSliderHeight();
+
+        loaded[gameId] = true;
+      },
+    });
+  }
+}
+
+function setSliderHeight() {
+  const imageHeight = $(
+    ".what-happens-photo-slider .slick-active img"
+  ).height();
+  $(".what-happens-photo-slider .slick-list").height(imageHeight);
+}
+var printAndClose = function printAndClose(data) {
+  $("#notify").html('<div class="msg-success">' + data.message + "</div>");
+  $.magnificPopup.open({
+    items: {
+      src: "#notify",
+    },
+    type: "inline",
+    callbacks: {
+      close: function () {
+        if (data.success) {
+          window.location.href = "../";
+        }
+      },
+    },
+  });
+};
+
+function cancelRegistration(game) {
+  if (!loaded[game]) {
+    $.ajax({
+      type: "get",
+      url: "/ajax/cancel-registration",
+      data: {
+        game: game,
+      },
+      response: "text",
+      async: true,
+      success: printAndClose,
+    });
+  }
+}
+
+function confirmRegistration(game) {
+  if (!loaded[game]) {
+    $.ajax({
+      type: "get",
+      url: "/ajax/confirm-registration",
+      data: {
+        game: game,
+        people: $("#range").val(),
+      },
+      response: "text",
+      async: true,
+      success: printAndClose,
+    });
+  }
+}
+
+var mapCities;
+
+function addMarker(map, city) {
+  if (city.lat && city.long) {
+    var marker = new google.maps.Marker({
+      map: map,
+      position: new google.maps.LatLng(city.lat, city.long),
+      icon: "img/gm_marker_32.png",
+    });
+  }
+}
+
+function initialize() {
+  var map_canvas = document.getElementById("fMap");
+  var map_options = {
+    center: new google.maps.LatLng(43.438835, 13.365245),
+    zoom: window.innerWidth <= 800 ? 1 : 2,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    scrollwheel: false,
+    clickableIcons: false,
+    fullscreenControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    streetViewControl: false,
+    zoomControl: false,
+    mapTypeControl: false,
+    disableDoubleClickZoom: true,
+    disableDefaultUI: true,
+    draggable: false,
+    keyboardShortcuts: false,
+    signInControl: false,
+    backgroundColor: "#421b75",
+    styles: [
+      {
+        featureType: "all",
+        elementType: "geometry",
+        stylers: [
+          {
+            color: "#421b75",
+          },
+        ],
+      },
+      {
+        featureType: "all",
+        elementType: "labels.text.fill",
+        stylers: [
+          {
+            gamma: 0.01,
+          },
+          {
+            lightness: 20,
+          },
+        ],
+      },
+      {
+        featureType: "all",
+        elementType: "labels.text.stroke",
+        stylers: [
+          {
+            saturation: -31,
+          },
+          {
+            lightness: -33,
+          },
+          {
+            weight: 2,
+          },
+          {
+            gamma: 0.8,
+          },
+        ],
+      },
+      {
+        featureType: "all",
+        elementType: "labels.icon",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "administrative",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "landscape",
+        elementType: "geometry",
+        stylers: [
+          {
+            lightness: -50,
+          },
+          {
+            saturation: 30,
+          },
+        ],
+      },
+      {
+        featureType: "landscape",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "landscape.man_made",
+        elementType: "all",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "landscape.man_made",
+        elementType: "geometry.fill",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "landscape.man_made",
+        elementType: "geometry.stroke",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "landscape.natural",
+        elementType: "geometry.fill",
+        stylers: [
+          {
+            lightness: "-36",
+          },
+        ],
+      },
+      {
+        featureType: "poi",
+        elementType: "geometry",
+        stylers: [
+          {
+            saturation: 20,
+          },
+        ],
+      },
+      {
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [
+          {
+            lightness: 20,
+          },
+          {
+            saturation: -20,
+          },
+        ],
+      },
+      {
+        featureType: "road",
+        elementType: "all",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [
+          {
+            lightness: 10,
+          },
+          {
+            saturation: -30,
+          },
+        ],
+      },
+      {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [
+          {
+            saturation: 25,
+          },
+          {
+            lightness: 25,
+          },
+        ],
+      },
+      {
+        featureType: "road",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "transit",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+      {
+        featureType: "water",
+        elementType: "all",
+        stylers: [
+          {
+            lightness: 0,
+          },
+        ],
+      },
+      {
+        featureType: "water",
+        elementType: "labels",
+        stylers: [
+          {
+            visibility: "off",
+          },
+        ],
+      },
+    ],
+  };
+  map = new google.maps.Map(map_canvas, map_options);
+
+  $.each(mapCities, function (i, v) {
+    addMarker(map, v);
+  });
+}
+
+function initFranshizaMap(cities) {
+  mapCities = cities;
+  google.maps.event.addDomListener(window, "load", initialize);
+}
+
+function select(lang) {
+  $("#lang").val(lang);
+  $(".langauge").submit();
+}
+
+$(document).ready(function () {
+  $("#menu-button").click(function () {
+    $("#nav").slideToggle("slow").toggleClass("active");
+    var img = $("#nav").hasClass("active")
+      ? "/img/openIcon.png"
+      : "/img/closeIcon.png";
+    $("#menu-button").attr("src", img);
+  });
+});
+window.change = function (value) {
+  $("#league").val(value);
+  $(".filter").submit();
+};

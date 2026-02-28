@@ -1,0 +1,309 @@
+/*****************************************************/
+/********************* CITY **************************/
+/*****************************************************/
+.header-region {font: 15px Raleway, Arial, Helvetica, sans-serif; cursor: pointer;    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    padding-right: 10px;
+    padding-left: 50px;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-transition: all 100ms ease-in-out;
+    transition: all 100ms ease-in-out;
+    color: #fff;
+    font-size: 16px;
+    line-height: 23px;
+    font-weight: 800;
+    text-decoration: none;}
+.header-region-icon {position: absolute;top: 12px;left: 22px;z-index: 12;}
+.header-region:hover .header-region-active:after {opacity: 1;}
+.header-region-list{z-index: 10;}
+.header-region-list, .header-region-confirm{position: absolute;top: 0;left: 0;padding: 15px 20px 15px 55px;}
+.header-region-country {font-weight: 700;color: #fcdb00;cursor: default;margin-top: 20px;margin-bottom: 20px;}
+
+.header-region-list li:not(.header-region-active) {
+    display: none;
+    position: relative;
+}
+.header-region-list li:not(.header-region-active):not(.header-region-country):hover:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    transform: translateY(-50%);
+    left: -30px;
+    width: 10px;
+    height: 9px;
+    background: url(https://cdn1.quizplease.com/old_static/img/sprite.png) no-repeat -28px 0;
+}
+.header-region-list li + li {
+    margin-bottom: 17px;
+
+}
+
+.total-city {
+    color: white;
+    display: none;
+}
+
+.header-region-confirm{
+    width: 230px;
+}
+
+.header-region-open .header-region-list, .header-region-confirm{
+    background-color: #7817fc;
+    box-shadow: 0 4px 0 #581aad;
+}
+.header-region-open .header-region-list li.header-region-country {
+    display: inline-block;
+}
+.header-region-open .header-region-list li:not(.header-region-country) {
+    display: block;
+}
+.header-region-open .header-region-list li:hover, .header-region-open .header-region-list li:hover a {
+    color: #fdd835;
+}
+.header-region-open .header-region-list a {
+    text-decoration: none;
+    color: #fff;
+}
+.header-region-active a {
+    color: #fff;
+   }
+.header-region-open .header-region-active:after {
+    opacity: 1;
+    -ms-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    transform: translateY(-50%) rotate(-180deg);
+    background-position: -20px 0 !important;
+}
+.header-region-open .icon-region {
+    background-position: 0 0 !important;
+}
+
+.header-region-active {
+    position: relative;
+	list-style-type: none;
+}
+.header-region-active:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    transform: translateY(-50%);
+    margin-left: 25px;
+    width: 8px;
+    height: 5px;
+    background: url(https://cdn1.quizplease.com/old_static/img/sprite.png) no-repeat;
+    background-position: -20px 0;
+    opacity: 0.8;
+    -webkit-transition: opacity 0.4s;
+    -o-transition: opacity 0.4s;
+    transition: opacity 0.4s;
+}
+
+.header-region-open-icon {
+    width: 8px;
+    height: 5px;
+    background-position: -20px 0;
+}
+
+.header-top-menu.fixed .header-region-confirm{
+    color: #fff;
+}
+.header-top-menu.fixed .header-region-active:after {
+    background-position: -20px -9px;
+}
+.header-top-menu.fixed .icon-region {
+    background-position: -84px -26px;
+}
+@media (max-width: 576px) {
+    .header-mobil-menu {
+        left: 15px
+    }
+    .header-language{
+        left: -40px;
+    }
+    .header-region {
+        margin-left: 0px!important;
+    }
+}
+@media (max-width: 992px) {
+	.header-region {font: 15px Raleway, Arial, Helvetica, sans-serif; cursor: pointer;    display: -webkit-box;
+	    display: -webkit-flex;
+	    display: -ms-flexbox;
+	    display: flex;
+	    padding-right: 10px;
+	    padding-left: 15px;
+	    -webkit-box-align: center;
+	    -webkit-align-items: center;
+	    -ms-flex-align: center;
+	    align-items: center;
+	    -webkit-transition: all 100ms ease-in-out;
+	    transition: all 100ms ease-in-out;
+	    color: #fff;
+	    font-size: 16px;
+	    font-weight: 800;
+	    text-decoration: none;
+		float: left;}
+    .header-region-icon {display: none;}
+	.header-region-list li + li {
+	    margin-bottom: 17px;
+		line-height: 0px;
+	}
+    .header-region-open .header-region-list{
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 15px 50px 15px 55px;
+        max-height: 98vh;
+        overflow: hidden;
+        overflow-y: scroll;
+        z-index: 150;
+        /*background: url(../img/bg.png) no-repeat;*/
+    }::-webkit-scrollbar{
+         width: 5px;
+     }::-webkit-scrollbar-thumb {
+          -webkit-border-radius: 0;
+          border-radius: 0;
+          background-color: #fcdb00;
+      }
+
+    .header-region-open .header-region-active {
+        position: absolute;
+        top: 15px;
+		right: 47px;
+    }
+
+    .total-city-open {
+        width: 100%;
+        display: block;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .header-region-active {
+        white-space: nowrap;
+	    margin-left: 55px;
+    }
+
+    .icon-language img {
+        display: none;
+    }
+	.header-region-active a {
+	    color: #fff;
+    }
+}
+
+@media (min-width: 992px) {
+    .header-region-list, .header-region-confirm{
+        list-style-position: inherit;
+        min-height: 50px;
+    }
+    .header-region-list {
+        width: 200px;
+    }
+	/*.header-region {*/
+		/*padding-left: 10px;*/
+
+	/*}*/
+	/*.pin-icon {*/
+	    /*margin-right: 100px;*/
+	/*}*/
+    .header-region-open .header-region-list{width: auto;margin-top: 50px;z-index: 11;}
+    .header-region-open .header-region-list ul {
+        /*background: url(../img/bg.png) no-repeat;*/
+        -moz-column-count: 4; /* Firefox */
+        -webkit-column-count: 4; /* Safari and Chrome */
+        column-count: 4;
+        column-gap: 60px;
+    }
+    .header-region-active a {
+	    color: #fff;
+    }
+	.header-region-active {
+	        white-space: nowrap;
+		    margin-left: 80px;
+		list-style-type: none;
+	    }
+
+    .header-region-country {
+        /*column-span: all;*/
+        margin-top: 5px;
+        margin-bottom: 12px;
+    }
+    .header-region-open .header-region-active {
+        margin-top: -48px;
+        background-color: #7817fc;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 15px 50px 15px 55px;
+    }
+
+    .total-city-open {
+        width: 100%;
+        display: block;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .header-region-list li + li:not(.header-region-country) {
+        margin-bottom: 7px;
+	    margin-left: 40px;
+
+    }
+}
+
+@media (max-width: 480px) {
+    .header-region-open .header-region-list, .header-region-confirm {
+        width: 256px;
+    }
+	.header-region {font: 15px Raleway, Arial, Helvetica, sans-serif; cursor: pointer;    display: -webkit-box;
+	    display: -webkit-flex;
+	    display: -ms-flexbox;
+	    display: flex;
+	    padding-right: 10px;
+	    padding-left: 15px;
+	    -webkit-box-align: center;
+	    -webkit-align-items: center;
+	    -ms-flex-align: center;
+	    align-items: center;
+	    -webkit-transition: all 100ms ease-in-out;
+	    transition: all 100ms ease-in-out;
+	    color: #fff;
+	    font-size: 16px;
+	    font-weight: 800;
+	    text-decoration: none;
+		float: left;}
+    .header-region-open .header-region-list {
+        padding-left: 15px;
+        padding-right: 0px;
+    }
+	.header-region-list li + li {
+	    margin-bottom: 17px;
+		line-height: 0px;
+	}
+    .header-region-list, .header-region-confirm {
+        padding-left: 25px;
+    }
+	.header-region-active a {
+	    color: #fff;
+    }
+	.header-region-active {
+        white-space: nowrap;
+	    margin-left: 80px;
+    }
+}
