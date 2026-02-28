@@ -8,22 +8,25 @@ This is a **quiz-bot** project — a bot (likely Telegram) for tracking and noti
 
 ## Project Status
 
-Phase 2 complete: live fetching from `saratov.quizplease.ru/schedule` + HTML parsing → Markdown output.
+Phase 3 complete: Telegram-бот с командой `/schedule` и публикацией опросов в группу.
 
-**Next step:** Telegram bot integration.
+**Next step:** деплой (запуск на сервере).
 
 ## Project Structure
 
 ```
 quiz-bot/
 ├── src/
-│   ├── index.ts       # entry point: fetches (live) or reads (--local) HTML, calls parser and formatter
+│   ├── index.ts       # entry point: bot mode (default) or CLI (--local / --parse)
+│   ├── bot.ts         # Telegraf bot: /schedule command, poll callback handler
 │   ├── fetcher.ts     # fetches live HTML via curl subprocess (bypasses Yandex SmartCaptcha)
 │   ├── parser.ts      # cheerio HTML parsing → Game[]
-│   └── formatter.ts   # Game[] → Markdown string
+│   └── formatter.ts   # formatSchedule() for CLI, formatGameForTelegram() + buildPollQuestion() for bot
 ├── data/
 │   ├── Расписание игр.html        # saved schedule page from saratov.quizplease.ru/schedule
 │   └── Расписание игр_files/      # static assets for the saved page
+├── .env                           # BOT_TOKEN, GROUP_CHAT_ID (gitignored)
+├── .env.example
 ├── package.json
 ├── tsconfig.json
 └── CLAUDE.md
@@ -32,10 +35,19 @@ quiz-bot/
 ## Running
 
 ```bash
-npm start          # fetch live schedule from saratov.quizplease.ru → Markdown to stdout
-npm start --local  # parse saved data/Расписание игр.html instead of fetching
-npm run build      # compile TypeScript to dist/
+npm start           # запустить бота (требует .env с BOT_TOKEN и GROUP_CHAT_ID)
+npm start --local   # CLI: распарсить сохранённый HTML → Markdown в stdout
+npm start --parse   # CLI: живой fetch → Markdown в stdout
+npm run build       # компиляция TypeScript в dist/
 ```
+
+## Bot Setup
+
+1. Создать бота через @BotFather → получить `BOT_TOKEN`
+2. Добавить бота в группу как участника
+3. Узнать `GROUP_CHAT_ID`: отправить сообщение в группу → открыть `https://api.telegram.org/bot<TOKEN>/getUpdates` → найти `"chat":{"id":-100...}`
+4. Заполнить `.env` (см. `.env.example`)
+5. `npm start`
 
 ## Data Source
 

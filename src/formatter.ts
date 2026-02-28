@@ -1,5 +1,31 @@
 import { Game } from './parser';
 
+export function formatGameForTelegram(game: Game): string {
+  const title = game.number
+    ? `<b>${game.title}</b> ${game.number}`
+    : `<b>${game.title}</b>`;
+  const location = [game.venue, game.address].filter(Boolean).join(', ');
+  const lines = [
+    title,
+    `📅 ${game.date} | 🕐 ${game.time}`,
+  ];
+  if (location) lines.push(`📍 ${location}`);
+  if (game.price) lines.push(`💰 ${game.price}`);
+  return lines.join('\n');
+}
+
+export function buildPollQuestion(game: Game): string {
+  const parts = [
+    `${game.title} ${game.number}`.trim(),
+    game.date,
+    game.time,
+    game.venue,
+  ].filter(Boolean);
+  const question = parts.join(' | ');
+  // Telegram poll question limit is 300 chars
+  return question.length <= 300 ? question : question.slice(0, 297) + '...';
+}
+
 export function formatSchedule(games: Game[]): string {
   // Group games by date, preserving order of first appearance
   const dateOrder: string[] = [];
