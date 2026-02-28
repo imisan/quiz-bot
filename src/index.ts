@@ -45,10 +45,11 @@ if (process.argv.includes('--parse')) {
 
   const bot = createBot(token, groupChatId);
 
-  bot.launch().then(() => {
-    console.log('Бот запущен. Нажмите Ctrl+C для остановки.');
-  });
+  process.once('SIGINT', () => { bot.stop(); process.exit(0); });
+  process.once('SIGTERM', () => { bot.stop(); process.exit(0); });
 
-  process.once('SIGINT', () => bot.stop('SIGINT'));
-  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+  bot.launch().catch((err) => {
+    console.error('Критическая ошибка:', err.message);
+    process.exit(1);
+  });
 }

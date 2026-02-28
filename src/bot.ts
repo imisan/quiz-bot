@@ -1,7 +1,7 @@
-import { Telegraf, Markup } from 'telegraf';
+import { TelegramBot, Update } from './telegram';
 import { fetchScheduleHtml } from './fetcher';
 import { parseSchedule, Game } from './parser';
-import { formatGameForTelegram, buildPollQuestion } from './formatter';
+import { buildPollQuestion } from './formatter';
 
 const POLL_OPTIONS = [
   '✅ Да, иду',
@@ -11,75 +11,114 @@ const POLL_OPTIONS = [
   '👥 Со мной +1',
 ];
 
-export function createBot(token: string, groupChatId: string): Telegraf {
-  const bot = new Telegraf(token);
+export function createBot(token: string, groupChatId: string): TelegramBot {
+  const bot = new TelegramBot(token);
 
   // In-memory cache of games for the current session
   const gameCache = new Map<string, Game>();
 
-  bot.command('start', (ctx) => {
-    ctx.reply(
-      'Привет! Я бот для расписания Quiz Please Саратов.\n\n' +
-      'Команды:\n' +
-      '/schedule — показать расписание игр'
-    );
-  });
+  async function handleUpdate(update: Update): Promise<void> {
+    // Handle commands
+    if (update.message?.text) {
+      const chatId = update.message.chat.id;
+      const text = update.message.text;
 
-  bot.command('schedule', async (ctx) => {
-    const statusMsg = await ctx.reply('⏳ Загружаю расписание...');
-
-    try {
-      const html = await fetchScheduleHtml();
-      const games = parseSchedule(html);
-
-      await ctx.telegram.deleteMessage(ctx.chat.id, statusMsg.message_id);
-
-      if (games.length === 0) {
-        await ctx.reply('Игры не найдены.');
+      if (text === '/start' || text.startsWith('/start@')) {
+        await bot.sendMessage(
+          chatId,
+          'Привет! Я бот для расписания Quiz Please Саратов.\n\nКоманды:\n/schedule — показать расписание игр'
+        );
         return;
       }
 
-      // Cache games for callback handling
-      gameCache.clear();
-      for (const game of games) {
-        gameCache.set(game.id, game);
+      if (text === '/schedule' || text.startsWith('/schedule@')) {
+        const statusMsg = await bot.sendMessage(chatId, '⏳ Загружаю расписание...');
+        try {
+          const html = await fetchScheduleHtml();
+          const games = parseSchedule(html);
+
+          await bot.deleteMessage(chatId, statusMsg.message_id);
+
+          if (games.length === 0) {
+            await bot.sendMessage(chatId, 'Игры не найдены.');
+            return;
+          }
+
+          gameCache.clear();
+          for (const game of games) {
+            gameCache.set(game.id, game);
+          }
+
+          // Group by date → one message per date
+          const dateOrder: string[] = [];
+          const byDate = new Map<string, Game[]>();
+          for (const game of games) {
+            if (!byDate.has(game.date)) {
+              byDate.set(game.date, []);
+              dateOrder.push(game.date);
+            }
+            byDate.get(game.date)!.push(game);
+          }
+
+          for (const date of dateOrder) {
+            const dateGames = byDate.get(date)!;
+
+            const lines = [`<b>📅 ${date}</b>`];
+            for (const game of dateGames) {
+              const loc = [game.venue, game.address].filter(Boolean).join(', ');
+              lines.push(`\n🎮 <b>${game.title}</b> ${game.number}\n🕐 ${game.time}${loc ? ` · 📍 ${loc}` : ''}${game.price ? ` · 💰 ${game.price}` : ''}`);
+            }
+
+            const buttons = dateGames.map(game => [{
+              text: `📊 ${game.title} ${game.number}`.trim(),
+              callback_data: `poll:${game.id}`,
+            }]);
+
+            await bot.sendMessage(chatId, lines.join('\n'), {
+              parse_mode: 'HTML',
+              reply_markup: { inline_keyboard: buttons },
+            });
+          }
+
+          await bot.sendMessage(chatId, `✅ Показаны все игры: ${games.length} шт. за ${dateOrder.length} дней.`);
+        } catch (err) {
+          await bot.deleteMessage(chatId, statusMsg.message_id).catch(() => {});
+          await bot.sendMessage(chatId, `❌ Ошибка: ${(err as Error).message}`);
+        }
+        return;
+      }
+    }
+
+    // Handle button presses
+    if (update.callback_query) {
+      const { id: callbackId, data, message } = update.callback_query;
+      if (!data?.startsWith('poll:')) return;
+
+      const gameId = data.slice(5);
+      const game = gameCache.get(gameId);
+
+      if (!game) {
+        await bot.answerCallbackQuery(callbackId, '❌ Данные устарели. Запустите /schedule заново.');
+        return;
       }
 
-      for (const game of games) {
-        await ctx.replyWithHTML(
-          formatGameForTelegram(game),
-          Markup.inlineKeyboard([
-            Markup.button.callback('📊 Опубликовать опрос в группу', `poll:${game.id}`),
-          ])
+      try {
+        await bot.sendPoll(
+          groupChatId,
+          buildPollQuestion(game),
+          POLL_OPTIONS,
+          { is_anonymous: false }
         );
+        await bot.answerCallbackQuery(callbackId, '✅ Опрос опубликован в группе!');
+      } catch (err) {
+        await bot.answerCallbackQuery(callbackId, `❌ Ошибка: ${(err as Error).message}`);
       }
-    } catch (err) {
-      await ctx.telegram.deleteMessage(ctx.chat.id, statusMsg.message_id);
-      await ctx.reply(`❌ Ошибка: ${(err as Error).message}`);
     }
-  });
+  }
 
-  bot.action(/^poll:(.+)$/, async (ctx) => {
-    const gameId = ctx.match[1];
-    const game = gameCache.get(gameId);
-
-    if (!game) {
-      await ctx.answerCbQuery('❌ Данные устарели. Запустите /schedule заново.');
-      return;
-    }
-
-    try {
-      await ctx.telegram.sendPoll(
-        groupChatId,
-        buildPollQuestion(game),
-        POLL_OPTIONS,
-        { is_anonymous: false }
-      );
-      await ctx.answerCbQuery('✅ Опрос опубликован в группе!');
-    } catch (err) {
-      await ctx.answerCbQuery(`❌ Ошибка: ${(err as Error).message}`);
-    }
-  });
+  // Attach handler and return
+  const originalLaunch = bot.launch.bind(bot);
+  bot.launch = () => originalLaunch(handleUpdate);
 
   return bot;
 }
