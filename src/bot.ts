@@ -4,11 +4,11 @@ import { parseSchedule, Game } from './parser';
 import { buildPollQuestion } from './formatter';
 
 const POLL_OPTIONS = [
-  '✅ Да, иду',
-  '❌ Нет, не смогу',
-  '🤔 Думаю',
-  '🏆 Играю за другую команду',
-  '👥 Со мной +1',
+  'Да, иду 💯%',
+  'Нет, не смогу 😔',
+  'Думаю 🤔⏳',
+  'Играю за другую команду 🚶',
+  'Со мной +1 👯',
 ];
 
 export function createBot(token: string, groupChatId: string): TelegramBot {
