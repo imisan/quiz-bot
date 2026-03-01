@@ -1,5 +1,5 @@
 # ── Stage 1: build ──────────────────────────────────────────────
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -8,7 +8,7 @@ COPY src ./src
 RUN npm run build
 
 # ── Stage 2: runtime ────────────────────────────────────────────
-FROM node:18-alpine
+FROM node:20-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY package*.json ./
