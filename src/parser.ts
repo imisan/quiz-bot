@@ -1,5 +1,3 @@
-import { load } from 'cheerio';
-
 export interface Game {
   id: string;
   number: string;
@@ -13,35 +11,44 @@ export interface Game {
   url: string;
 }
 
-export function parseSchedule(html: string): Game[] {
-  const $ = load(html);
-  const games: Game[] = [];
+function parseDate(dateStr: string): { date: string; time: string } {
+  // dateStr format: "18.03.2026 19:30"
+  const [datePart, timePart] = dateStr.split(' ');
+  const [day, month, year] = datePart.split('.');
+  const d = new Date(+year, +month - 1, +day);
 
-  $('.schedule-column').each((_i, el) => {
-    const column = $(el);
-    const id = column.attr('id') ?? '';
+  const parts = new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    weekday: 'long',
+  }).formatToParts(d);
 
-    const date = column.find('.block-date-with-language-game').text().trim();
-    const title = column.find('.h2-game-card.h2-left').text().trim();
-    const number = column.find('.h2-game-card').not('.h2-left').first().text().trim();
-    // Extract only the direct text node of .schedule-block-info-bar (skip button children)
-    const venueEl = column.find('.schedule-block-info-bar');
-    venueEl.find('button').remove();
-    const venue = venueEl.text().trim();
-    const address = column.find('.techtext-halfwhite').first().text().replace(/Где это\?/g, '').trim();
+  const dayVal = parts.find(p => p.type === 'day')?.value ?? '';
+  const monthVal = parts.find(p => p.type === 'month')?.value ?? '';
+  const weekdayVal = parts.find(p => p.type === 'weekday')?.value ?? '';
+  const weekdayCapitalized = weekdayVal.charAt(0).toUpperCase() + weekdayVal.slice(1);
 
-    // Time is in the second .schedule-info block
-    const timeBlock = column.find('.schedule-info').eq(1);
-    const time = timeBlock.find('.techtext').first().text().trim();
+  return {
+    date: `${dayVal} ${monthVal}, ${weekdayCapitalized}`,
+    time: `в ${timePart}`,
+  };
+}
 
-    const price = column.find('.price').text().trim();
-    const available = column.find('.schedule-block').hasClass('available');
-    const url = column.find('a[href*="game-page?id="]').first().attr('href') ?? '';
-
-    if (title && date) {
-      games.push({ id, number, title, date, time, venue, address, price, available, url });
-    }
+export function parseSchedule(rawGames: any[]): Game[] {
+  return rawGames.map(g => {
+    const { date, time } = parseDate(g.date);
+    const price = g.price ? `${g.price}₽` : '';
+    return {
+      id: String(g.id),
+      number: g.game_number ? `#${g.game_number}` : '',
+      title: g.title ?? '',
+      date,
+      time,
+      venue: g.place?.title ?? '',
+      address: g.place?.address ?? '',
+      price,
+      available: g.status === 0,
+      url: `https://quizplease.ru/game-page?id=${g.id}`,
+    };
   });
-
-  return games;
 }

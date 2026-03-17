@@ -1,5 +1,5 @@
 import { TelegramBot, Update } from './telegram';
-import { fetchScheduleHtml } from './fetcher';
+import { fetchScheduleGames } from './fetcher';
 import { parseSchedule, Game } from './parser';
 import { buildPollQuestion } from './formatter';
 
@@ -34,8 +34,8 @@ export function createBot(token: string, groupChatId: string): TelegramBot {
       if (text === '/schedule' || text.startsWith('/schedule@')) {
         const statusMsg = await bot.sendMessage(chatId, '⏳ Загружаю расписание...');
         try {
-          const html = await fetchScheduleHtml();
-          const games = parseSchedule(html);
+          const rawGames = await fetchScheduleGames();
+          const games = parseSchedule(rawGames);
 
           await bot.deleteMessage(chatId, statusMsg.message_id);
 

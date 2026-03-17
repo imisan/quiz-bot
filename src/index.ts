@@ -1,28 +1,14 @@
 import 'dotenv/config';
-import * as fs from 'fs';
-import * as path from 'path';
 import { createBot } from './bot';
-import { fetchScheduleHtml } from './fetcher';
+import { fetchScheduleGames } from './fetcher';
 import { parseSchedule } from './parser';
 import { formatSchedule } from './formatter';
-
-// CLI mode: npm start --local  →  print Markdown to stdout
-if (process.argv.includes('--local')) {
-  const html = fs.readFileSync(
-    path.join(__dirname, '..', 'data', 'Расписание игр.html'),
-    'utf-8'
-  );
-  const games = parseSchedule(html);
-  console.log(formatSchedule(games));
-  console.error(`\nПарсинг завершён: найдено ${games.length} игр.`);
-  process.exit(0);
-}
 
 // CLI mode: npm start --parse  →  fetch live and print Markdown to stdout
 if (process.argv.includes('--parse')) {
   (async () => {
-    const html = await fetchScheduleHtml();
-    const games = parseSchedule(html);
+    const rawGames = await fetchScheduleGames();
+    const games = parseSchedule(rawGames);
     console.log(formatSchedule(games));
     console.error(`\nПарсинг завершён: найдено ${games.length} игр.`);
   })().catch((err) => {
