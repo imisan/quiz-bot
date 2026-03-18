@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { createBot } from './bot';
 import { QuizPleaseSource } from './sources/quizplease';
+import { ShakerQuizSource } from './sources/shaker';
 import { formatSchedule } from './formatter';
 
 // CLI mode: npm start --parse  →  fetch live and print Markdown to stdout
@@ -27,7 +28,7 @@ if (process.argv.includes('--parse')) {
     process.exit(1);
   }
 
-  const sources = [new QuizPleaseSource()];
+  const sources = [new QuizPleaseSource(), new ShakerQuizSource()];
   const bot = createBot(token, groupChatId, sources);
 
   process.once('SIGINT', () => { bot.stop(); process.exit(0); });
