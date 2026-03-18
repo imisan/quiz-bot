@@ -109,9 +109,10 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
       }
 
       try {
+        const question = `[${game.sourceLabel}] ${buildPollQuestion(game)}`;
         await bot.sendPoll(
           groupChatId,
-          buildPollQuestion(game),
+          question.length <= 300 ? question : question.slice(0, 297) + '...',
           POLL_OPTIONS,
           { is_anonymous: false }
         );
