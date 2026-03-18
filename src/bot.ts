@@ -76,7 +76,7 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
             }
 
             const buttons = dateGames.map(game => [{
-              text: `📊 ${game.title} ${game.number}`.trim(),
+              text: `📊 [${game.sourceLabel}] ${game.title} ${game.number}`.trim(),
               callback_data: `poll:${game.id}`,
             }]);
 
