@@ -8,26 +8,25 @@ This is a **quiz-bot** project — a Telegram bot for tracking and notifying abo
 
 ## Project Status
 
-Phase 3 complete: Telegram-бот с командой `/schedule` и публикацией опросов в группу.
-Зависимость от `telegraf` удалена — бот работает на собственном клиенте (`src/telegram.ts`) через `curl`.
+**Задеплоен и работает.** Хостинг: [Railway](https://railway.com). CD настроен: push в `main` → автоматический деплой новой версии.
 
-**Next step:** деплой (запуск на сервере).
+- Бот работает на собственном клиенте (`src/telegram.ts`) через `curl` (зависимость от `telegraf` удалена)
+- Данные берутся из REST API `api.quizplease.ru` (сайт переехал на Nuxt.js, HTML-парсинг удалён)
 
 ## Project Structure
 
 ```
 quiz-bot/
 ├── src/
-│   ├── index.ts       # entry point: bot mode (default) or CLI (--local / --parse)
+│   ├── index.ts       # entry point: bot mode (default) or CLI (--parse)
 │   ├── bot.ts         # /schedule command + poll callback; uses TelegramBot from telegram.ts
 │   ├── telegram.ts    # собственный Telegram Bot API клиент через curl (polling, sendMessage, sendPoll, …)
-│   ├── fetcher.ts     # fetches live HTML via curl subprocess (bypasses Yandex SmartCaptcha)
-│   ├── parser.ts      # cheerio HTML parsing → Game[]
+│   ├── fetcher.ts     # fetchScheduleGames() → REST API api.quizplease.ru через curl
+│   ├── parser.ts      # JSON → Game[] (parseSchedule + parseDate)
 │   └── formatter.ts   # formatSchedule() for CLI, buildPollQuestion() for bot
-├── data/
-│   ├── Расписание игр.html        # saved schedule page from saratov.quizplease.ru/schedule
-│   └── Расписание игр_files/      # static assets for the saved page
 ├── .env                           # BOT_TOKEN, GROUP_CHAT_ID (gitignored)
+├── fly.toml                       # Fly.io конфигурация деплоя
+├── Dockerfile
 ├── package.json
 ├── tsconfig.json
 └── CLAUDE.md
@@ -37,7 +36,6 @@ quiz-bot/
 
 ```bash
 npm start           # запустить бота (требует .env с BOT_TOKEN и GROUP_CHAT_ID)
-npm start --local   # CLI: распарсить сохранённый HTML → Markdown в stdout
 npm start --parse   # CLI: живой fetch → Markdown в stdout
 npm run build       # компиляция TypeScript в dist/
 ```
@@ -56,26 +54,27 @@ npm run build       # компиляция TypeScript в dist/
 
 ## Data Source
 
-The primary data source is the Quiz Please schedule page for Saratov:
-- URL: `https://saratov.quizplease.ru/schedule`
-- The page is in Russian
-- HTML is server-side rendered — the game data is present in the raw HTML response
-- **Yandex SmartCaptcha** blocks Node.js's built-in `fetch`/`https` (TLS fingerprint detection); `curl` passes through fine — поэтому и HTML-fetching (`fetcher.ts`), и Telegram API (`telegram.ts`) используют `curl`
+REST API без авторизации:
+```
+GET https://api.quizplease.ru/api/games/schedule/57?per_page=100&order=date&statuses[]=0&statuses[]=1&statuses[]=2&statuses[]=3&statuses[]=5
+```
+- `57` — city_id для Саратова
+- Возвращает JSON: `{ status: "ok", data: { data: [...], pagination: {...} } }`
+- **Yandex SmartCaptcha** блокирует Node.js `fetch`/`https` (TLS fingerprint); `curl` проходит — поэтому fetcher и Telegram API используют `curl`
 
-## HTML Selectors (saratov.quizplease.ru/schedule)
+## API → Game маппинг
 
-Each game is a `div.schedule-column` with `id=GAME_ID`:
-
-| Field       | Selector |
-|-------------|----------|
-| Date        | `.block-date-with-language-game` |
-| Title       | `.h2-game-card.h2-left` |
-| Number      | `.h2-game-card` (second, not `.h2-left`) |
-| Venue       | `.schedule-block-info-bar` — strip inner `<button>` ("Информация о площадке") |
-| Address     | `.techtext-halfwhite` first — strip "Где это?" link text |
-| Time        | second `.schedule-info` → `.techtext` first |
-| Price       | `.price` |
-| Availability| `.schedule-block.available` vs `.schedule-block.soldout` |
+| API поле | Game поле | Примечание |
+|---|---|---|
+| `id` | `id` | UUID |
+| `game_number` | `number` | добавить префикс `#` |
+| `title` | `title` | |
+| `date` (DD.MM.YYYY HH:MM) | `date` + `time` | конвертируется через `Intl.DateTimeFormat('ru-RU')` |
+| `place.title` | `venue` | |
+| `place.address` | `address` | |
+| `price` | `price` | добавить `₽` |
+| `status === 0` | `available` | 0 = открыта запись |
+| `id` | `url` | `https://quizplease.ru/game-page?id={id}` |
 
 ## Game Interface
 
