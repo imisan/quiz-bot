@@ -1,4 +1,4 @@
-import { Game } from './parser';
+import { Game } from './types';
 
 export function formatGameForTelegram(game: Game): string {
   const title = game.number

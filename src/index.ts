@@ -1,14 +1,12 @@
 import 'dotenv/config';
 import { createBot } from './bot';
-import { fetchScheduleGames } from './fetcher';
-import { parseSchedule } from './parser';
+import { QuizPleaseSource } from './sources/quizplease';
 import { formatSchedule } from './formatter';
 
 // CLI mode: npm start --parse  →  fetch live and print Markdown to stdout
 if (process.argv.includes('--parse')) {
   (async () => {
-    const rawGames = await fetchScheduleGames();
-    const games = parseSchedule(rawGames);
+    const games = await new QuizPleaseSource().fetchGames();
     console.log(formatSchedule(games));
     console.error(`\nПарсинг завершён: найдено ${games.length} игр.`);
   })().catch((err) => {
@@ -29,7 +27,8 @@ if (process.argv.includes('--parse')) {
     process.exit(1);
   }
 
-  const bot = createBot(token, groupChatId);
+  const sources = [new QuizPleaseSource()];
+  const bot = createBot(token, groupChatId, sources);
 
   process.once('SIGINT', () => { bot.stop(); process.exit(0); });
   process.once('SIGTERM', () => { bot.stop(); process.exit(0); });

@@ -1,7 +1,8 @@
 import { TelegramBot, Update } from './telegram';
-import { fetchScheduleGames } from './fetcher';
-import { parseSchedule, Game } from './parser';
+import { Game, GameSource } from './types';
 import { buildPollQuestion } from './formatter';
+
+type TaggedGame = Game & { sourceLabel: string };
 
 const POLL_OPTIONS = [
   'Да, иду 💯%',
@@ -11,11 +12,11 @@ const POLL_OPTIONS = [
   'Со мной +1 👯',
 ];
 
-export function createBot(token: string, groupChatId: string): TelegramBot {
+export function createBot(token: string, groupChatId: string, sources: GameSource[]): TelegramBot {
   const bot = new TelegramBot(token);
 
   // In-memory cache of games for the current session
-  const gameCache = new Map<string, Game>();
+  const gameCache = new Map<string, TaggedGame>();
 
   async function handleUpdate(update: Update): Promise<void> {
     // Handle commands
@@ -34,8 +35,13 @@ export function createBot(token: string, groupChatId: string): TelegramBot {
       if (text === '/schedule' || text.startsWith('/schedule@')) {
         const statusMsg = await bot.sendMessage(chatId, '⏳ Загружаю расписание...');
         try {
-          const rawGames = await fetchScheduleGames();
-          const games = parseSchedule(rawGames);
+          const results = await Promise.allSettled(sources.map(s => s.fetchGames()));
+          const games: TaggedGame[] = results
+            .flatMap((r, i) => r.status === 'fulfilled'
+              ? r.value.map(g => ({ ...g, sourceLabel: sources[i].label }))
+              : []
+            )
+            .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
 
           await bot.deleteMessage(chatId, statusMsg.message_id);
 
@@ -51,7 +57,7 @@ export function createBot(token: string, groupChatId: string): TelegramBot {
 
           // Group by date → one message per date
           const dateOrder: string[] = [];
-          const byDate = new Map<string, Game[]>();
+          const byDate = new Map<string, TaggedGame[]>();
           for (const game of games) {
             if (!byDate.has(game.date)) {
               byDate.set(game.date, []);
@@ -66,7 +72,7 @@ export function createBot(token: string, groupChatId: string): TelegramBot {
             const lines = [`<b>📅 ${date}</b>`];
             for (const game of dateGames) {
               const loc = [game.venue, game.address].filter(Boolean).join(', ');
-              lines.push(`\n🎮 <b>${game.title}</b> ${game.number}\n🕐 ${game.time}${loc ? ` · 📍 ${loc}` : ''}${game.price ? ` · 💰 ${game.price}` : ''}`);
+              lines.push(`\n🎮 [${game.sourceLabel}] <b>${game.title}</b> ${game.number}\n🕐 ${game.time}${loc ? ` · 📍 ${loc}` : ''}${game.price ? ` · 💰 ${game.price}` : ''}`);
             }
 
             const buttons = dateGames.map(game => [{
