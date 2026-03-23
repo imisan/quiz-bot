@@ -18,7 +18,7 @@ export function buildPollQuestion(game: Game): string {
   const datetime = [game.date, game.time.replace(/^в\s*/i, '')].filter(Boolean).join(', ');
   const title = `${game.title} ${game.number}`.trim();
   const location = [game.venue, game.address].filter(Boolean).join(', ');
-  const question = [datetime, title, location, game.price].filter(Boolean).join('\n');
+  const question = [datetime, title, location, game.price ? `[${game.price}]` : ''].filter(Boolean).join('\n');
   // Telegram poll question limit is 300 chars
   return question.length <= 300 ? question : question.slice(0, 297) + '...';
 }
