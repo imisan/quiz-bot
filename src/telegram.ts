@@ -94,6 +94,10 @@ export class TelegramBot {
     });
   }
 
+  async setMyCommands(commands: Array<{ command: string; description: string }>): Promise<void> {
+    await this.callApi('setMyCommands', { commands });
+  }
+
   async answerCallbackQuery(callbackQueryId: string, text?: string): Promise<void> {
     await this.callApi('answerCallbackQuery', {
       callback_query_id: callbackQueryId,

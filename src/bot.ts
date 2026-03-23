@@ -125,7 +125,12 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
 
   // Attach handler and return
   const originalLaunch = bot.launch.bind(bot);
-  bot.launch = () => originalLaunch(handleUpdate);
+  bot.launch = async () => {
+    await bot.setMyCommands([
+      { command: 'schedule', description: 'Показать расписание игр' },
+    ]);
+    return originalLaunch(handleUpdate);
+  };
 
   return bot;
 }
