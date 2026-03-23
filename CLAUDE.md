@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- **Git operations (commit, push, и любые деструктивные команды) — всегда запрашивать подтверждение у пользователя. Никогда не выполнять автоматически.**
+
 ## Project Overview
 
 This is a **quiz-bot** project — a Telegram bot for tracking and notifying about bar quiz game schedules in **Saratov**. Aggregates games from multiple sources.
