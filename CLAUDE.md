@@ -26,7 +26,8 @@ quiz-bot/
 │   ├── formatter.ts            # formatSchedule() for CLI, buildPollQuestion() for bot
 │   └── sources/
 │       ├── quizplease.ts       # QuizPleaseSource — REST API api.quizplease.ru (префикс "КП")
-│       └── shaker.ts           # ShakerQuizSource — парсинг __NEXT_DATA__ saratov.shakerquiz.ru (префикс "Шейкер")
+│       ├── shaker.ts           # ShakerQuizSource — парсинг __NEXT_DATA__ saratov.shakerquiz.ru (префикс "Шейкер")
+│       └── wowquiz.ts          # WowQuizSource — REST API api.etowow.ru saratov.wowquiz.ru (префикс "WOW")
 ├── .env                        # BOT_TOKEN, GROUP_CHAT_ID (gitignored)
 ├── fly.toml                    # Fly.io конфигурация деплоя
 ├── Dockerfile
@@ -60,7 +61,7 @@ npm run build       # компиляция TypeScript в dist/
 Каждый источник реализует интерфейс:
 ```typescript
 interface GameSource {
-  label: string;               // префикс в выводе бота, напр. "КП", "Шейкер"
+  label: string;               // префикс в выводе бота, напр. "КП", "Шейкер", "WOW"
   fetchGames(): Promise<Game[]>;
 }
 ```
@@ -72,7 +73,7 @@ interface GameSource {
 
 Чтобы добавить новый источник:
 1. Создать `src/sources/newsource.ts` с классом, реализующим `GameSource`
-2. Добавить в массив в `src/index.ts`: `[new QuizPleaseSource(), new ShakerQuizSource(), new NewSource()]`
+2. Добавить в массив в `src/index.ts`: `[new QuizPleaseSource(), new ShakerQuizSource(), new WowQuizSource(), new NewSource()]`
 
 ## Sources
 
@@ -96,6 +97,27 @@ GET https://api.quizplease.ru/api/games/schedule/57?per_page=100&order=date&stat
 | `price` | `price` | добавить `₽` |
 | `status === 0` | `available` | 0 = открыта запись |
 | `id` | `url` | `https://quizplease.ru/game-page?id={id}` |
+
+### WowQuizSource (`src/sources/wowquiz.ts`) — префикс "WOW"
+
+REST API без авторизации с пагинацией:
+```
+GET https://api.etowow.ru/games/all?upcoming=1&page={n}&domain=https:%2F%2Fsaratov.wowquiz.ru
+```
+- Возвращает JSON: `{ status: "success", data: { games: [...], pageCount: N, perPage: 10 } }`
+- Все страницы запрашиваются параллельно через `Promise.all`
+
+| API поле | Game поле | Примечание |
+|---|---|---|
+| `id` | `id` | Numeric → String |
+| *(нет)* | `number` | пустая строка |
+| `title` | `title` | |
+| `date` ("YYYY-MM-DD HH:MM:SS") | `date` + `time` + `dateTime` | уже локальное время |
+| `bar.title` | `venue` | |
+| `bar.address` | `address` | |
+| `price` | `price` | Numeric → добавить `₽` |
+| `registration_type === "open"` | `available` | |
+| `code` | `url` | `https://saratov.wowquiz.ru/game/{code}` |
 
 ### ShakerQuizSource (`src/sources/shaker.ts`) — префикс "Шейкер"
 
