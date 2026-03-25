@@ -4,6 +4,7 @@ import { QuizPleaseSource } from './sources/quizplease';
 import { ShakerQuizSource } from './sources/shaker';
 import { WowQuizSource } from './sources/wowquiz';
 import { Club60SecSource } from './sources/club60sec';
+import { QuizLandSource } from './sources/quizland';
 import { formatSchedule } from './formatter';
 
 // CLI mode: npm start --parse  →  fetch live and print Markdown to stdout
@@ -30,7 +31,7 @@ if (process.argv.includes('--parse')) {
     process.exit(1);
   }
 
-  const sources = [new QuizPleaseSource(), new ShakerQuizSource(), new WowQuizSource(), new Club60SecSource()];
+  const sources = [new QuizPleaseSource(), new ShakerQuizSource(), new WowQuizSource(), new Club60SecSource(), new QuizLandSource()];
   const bot = createBot(token, groupChatId, sources);
 
   process.once('SIGINT', () => { bot.stop(); process.exit(0); });
