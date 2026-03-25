@@ -76,7 +76,7 @@ export class QuizLandSource implements GameSource {
     const venue = venueRaw.trim();
 
     return {
-      id: `quizland-${title}-${dateTimeRaw.trim()}`,
+      id: this.shortId(title + dateTimeRaw.trim()),
       number,
       title,
       date,
@@ -88,6 +88,15 @@ export class QuizLandSource implements GameSource {
       available: true,
       url: PAGE_URL,
     };
+  }
+
+  // DJB2 hash → short stable id, well within Telegram's 64-byte callback_data limit
+  private shortId(str: string): string {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = (((hash << 5) + hash) ^ str.charCodeAt(i)) >>> 0;
+    }
+    return 'ql-' + hash.toString(16);
   }
 
   private formatDate(d: Date, hours: number, minutes: number): { date: string; time: string } {
