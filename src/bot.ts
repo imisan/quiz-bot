@@ -35,7 +35,20 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
       if (text === '/schedule' || text.startsWith('/schedule@')) {
         const statusMsg = await bot.sendMessage(chatId, '⏳ Загружаю расписание...');
         try {
+          console.log(`[schedule] fetching from ${sources.length} sources: ${sources.map(s => s.label).join(', ')}`);
           const results = await Promise.allSettled(sources.map(s => s.fetchGames()));
+
+          const failedLabels: string[] = [];
+          results.forEach((r, i) => {
+            const label = sources[i].label;
+            if (r.status === 'fulfilled') {
+              console.log(`[${label}] OK — ${r.value.length} games`);
+            } else {
+              console.error(`[${label}] FAILED:`, r.reason);
+              failedLabels.push(label);
+            }
+          });
+
           const games: TaggedGame[] = results
             .flatMap((r, i) => r.status === 'fulfilled'
               ? r.value.map(g => ({ ...g, sourceLabel: sources[i].label }))
@@ -44,6 +57,10 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
             .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
 
           await bot.deleteMessage(chatId, statusMsg.message_id);
+
+          if (failedLabels.length > 0) {
+            await bot.sendMessage(chatId, `⚠️ Не удалось загрузить: ${failedLabels.map(l => `[${l}]`).join(', ')}`);
+          }
 
           if (games.length === 0) {
             await bot.sendMessage(chatId, 'Игры не найдены.');
@@ -86,7 +103,12 @@ export function createBot(token: string, groupChatId: string, sources: GameSourc
             });
           }
 
-          await bot.sendMessage(chatId, `✅ Показаны все игры: ${games.length} шт. за ${dateOrder.length} дней.`);
+          const bySource = sources.map(s => {
+            const count = games.filter(g => g.sourceLabel === s.label).length;
+            return `[${s.label}]: ${count}`;
+          }).join(', ');
+          console.log(`[schedule] done — total ${games.length} games. ${bySource}`);
+          await bot.sendMessage(chatId, `✅ Показаны все игры: ${games.length} шт. за ${dateOrder.length} дней.\n📊 По источникам: ${bySource}`);
         } catch (err) {
           await bot.deleteMessage(chatId, statusMsg.message_id).catch(() => {});
           await bot.sendMessage(chatId, `❌ Ошибка: ${(err as Error).message}`);
